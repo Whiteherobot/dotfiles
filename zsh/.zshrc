@@ -18,3 +18,6 @@ alias copilot='code --install-extension GitHub.copilot'
 export LIBVA_DRIVER_NAME=nvidia
 export GBM_BACKEND=nvidia-drm
 export __GLX_VENDOR_LIBRARY_NAME=nvidia
+
+
+export PATH="$HOME/.local/bin:$PATH"
