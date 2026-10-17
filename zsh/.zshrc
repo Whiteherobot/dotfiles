@@ -1,55 +1,42 @@
-# ~/.zshrc - configuración inicial
+# ~/.zshrc
 
 # Variables de entorno
 export PATH="$HOME/.local/bin:$PATH"
 export EDITOR=nvim
 export VISUAL=code
 
-# Aliases útiles
+# Aliases
 alias ll='ls -lah --color=auto'
 alias gs='git status'
 alias gp='git pull'
 alias gcm='git commit -m'
 
-# Copilot CLI
-alias copilot='code --install-extension GitHub.copilot'
+# Prompt Starship
+command -v starship >/dev/null && eval "$(starship init zsh)"
 
-# NVIDIA GPU Environment (Wayland / Hyprland)
-export LIBVA_DRIVER_NAME=nvidia
-export GBM_BACKEND=nvidia-drm
-export __GLX_VENDOR_LIBRARY_NAME=nvidia
-
-# Prompt Starship para Zsh
-eval "$(starship init zsh)"
-
-# Detectar si la shell fue lanzada directamente por kitty (nueva ventana física)
-PARENT_PROC=$(ps -p $PPID -o comm=)
-
-if [[ -z "$TMUX" ]] && [[ -z "$SSH_TTY" ]] && [[ "$PARENT_PROC" == "kitty" ]]; then
-  fastfetch 
+# fastfetch solo al abrir una ventana nueva de kitty (no en tmux ni por SSH)
+if [[ -z "$TMUX" && -z "$SSH_TTY" && "$(ps -p $PPID -o comm=)" == "kitty" ]]; then
+  command -v fastfetch >/dev/null && fastfetch
 fi
 
 # === Historial persistente ===
-HISTFILE=~/.zsh_history   # Archivo donde se guarda el historial
-HISTSIZE=10000            # Número de comandos a guardar en RAM
-SAVEHIST=10000            # Número de comandos a guardar en disco
+HISTFILE=~/.zsh_history
+HISTSIZE=10000
+SAVEHIST=10000
 
-setopt APPEND_HISTORY     # Agregar, no sobrescribir
-setopt INC_APPEND_HISTORY # Guardar comandos inmediatamente
-setopt SHARE_HISTORY      # Compartir entre sesiones Zsh abiertas
-setopt HIST_IGNORE_DUPS   # Ignorar duplicados consecutivos
-setopt HIST_IGNORE_ALL_DUPS  # Ignorar duplicados en todo el archivo
-setopt HIST_REDUCE_BLANKS    # Quitar espacios innecesarios
-# === Flechas arriba/abajo ===
-bindkey "^[[A" up-line-or-history
-bindkey "^[[B" down-line-or-history
+setopt APPEND_HISTORY       # agregar, no sobrescribir
+setopt INC_APPEND_HISTORY   # guardar cada comando al momento
+setopt SHARE_HISTORY        # compartir entre sesiones abiertas
+setopt HIST_IGNORE_ALL_DUPS # sin duplicados en todo el historial
+setopt HIST_REDUCE_BLANKS
 
-# === Buscar comandos que comienzan igual ===
-autoload -Uz up-line-or-beginning-search
-autoload -Uz down-line-or-beginning-search
+# === Flechas: buscar comandos que empiezan igual ===
+autoload -Uz up-line-or-beginning-search down-line-or-beginning-search
 zle -N up-line-or-beginning-search
 zle -N down-line-or-beginning-search
 bindkey "^[[A" up-line-or-beginning-search
 bindkey "^[[B" down-line-or-beginning-search
 
-source /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
+# Sugerencias según el historial (paquete zsh-autosuggestions)
+[[ -f /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh ]] &&
+  source /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
