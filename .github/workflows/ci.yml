@@ -1,0 +1,26 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+jobs:
+  revisar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get install -y zsh shellcheck
+      - name: install.sh
+        run: shellcheck install.sh
+      - name: .zshrc
+        run: zsh -n zsh/.zshrc
+      - name: Configuración de Waybar
+        run: jq empty waybar/config
+      - name: Instalar en un HOME vacío y volver a correr
+        run: |
+          export HOME="$(mktemp -d)"
+          echo viejo > "$HOME/.zshrc"
+          ./install.sh
+          ./install.sh | grep -c "ya enlazado" | grep -qx 4
+          test "$(cat "$HOME"/.dotfiles-respaldo/*/.zshrc)" = viejo
