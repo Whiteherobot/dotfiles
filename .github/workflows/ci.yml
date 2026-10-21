@@ -10,9 +10,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: sudo apt-get install -y zsh shellcheck
-      - name: install.sh
-        run: shellcheck install.sh
+      - run: sudo apt-get install -y zsh shellcheck lua5.4
+      - name: Scripts
+        run: shellcheck install.sh omarchy/waybar/scripts/jarvis-indicator.sh
+      - name: Configuración de Hyprland en Lua (Omarchy)
+        run: for f in omarchy/hypr/*.lua; do luac5.4 -p "$f"; done
       - name: .zshrc
         run: zsh -n zsh/.zshrc
       - name: Configuración de Waybar
@@ -24,3 +26,8 @@ jobs:
           ./install.sh
           ./install.sh | grep -c "ya enlazado" | grep -qx 4
           test "$(cat "$HOME"/.dotfiles-respaldo/*/.zshrc)" = viejo
+      - name: Instalar la configuración de Omarchy en un HOME vacío
+        run: |
+          export HOME="$(mktemp -d)"
+          ./install.sh --omarchy | grep -c "^enlazado" | grep -qx 15
+          ./install.sh --omarchy | grep -c "ya enlazado" | grep -qx 15
