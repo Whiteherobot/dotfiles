@@ -1,14 +1,22 @@
 #!/usr/bin/env bash
 # Enlaza los archivos del repo en su lugar. Lo que ya exista se mueve a
 # ~/.dotfiles-respaldo/<fecha>/ antes de reemplazarlo.
-#   ./install.sh          instala
-#   ./install.sh --prueba muestra lo que haría sin tocar nada
+#   ./install.sh            instala la configuración de 2025 (Arch + Hyprland)
+#   ./install.sh --omarchy  instala la configuración actual (Omarchy, 2026)
+#   --prueba                muestra lo que haría sin tocar nada (combinable)
 set -euo pipefail
 
 repo="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 respaldo="$HOME/.dotfiles-respaldo/$(date +%Y%m%d-%H%M%S)"
 prueba=false
-[[ "${1:-}" == "--prueba" ]] && prueba=true
+omarchy=false
+for arg in "$@"; do
+  case "$arg" in
+    --prueba) prueba=true ;;
+    --omarchy) omarchy=true ;;
+    *) echo "opción desconocida: $arg" >&2; exit 2 ;;
+  esac
+done
 
 corto() { echo "~${1#"$HOME"}"; }
 
@@ -18,6 +26,21 @@ enlaces=(
   "waybar/style.css:.config/waybar/style.css"
   "zsh/.zshrc:.zshrc"
 )
+
+# Omarchy trae sus valores por defecto en ~/.local/share/omarchy; estos son solo mis cambios.
+if $omarchy; then
+  enlaces=()
+  for f in hyprland.lua bindings.lua monitors.lua looknfeel.lua input.lua autostart.lua \
+           hypridle.conf hyprlock.conf hyprsunset.conf input.conf xdph.conf; do
+    enlaces+=("omarchy/hypr/$f:.config/hypr/$f")
+  done
+  enlaces+=(
+    "omarchy/waybar/config.jsonc:.config/waybar/config.jsonc"
+    "omarchy/waybar/style.css:.config/waybar/style.css"
+    "omarchy/waybar/scripts/jarvis-indicator.sh:.config/waybar/scripts/jarvis-indicator.sh"
+    "omarchy/starship.toml:.config/starship.toml"
+  )
+fi
 
 for par in "${enlaces[@]}"; do
   origen="$repo/${par%%:*}"
