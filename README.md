@@ -2,8 +2,29 @@
 
 [![CI](https://github.com/Whiteherobot/dotfiles/actions/workflows/ci.yml/badge.svg)](https://github.com/Whiteherobot/dotfiles/actions/workflows/ci.yml)
 
-Mi configuración de escritorio de junio de 2025: Arch Linux con Hyprland,
-Waybar y zsh, en una laptop con GPU NVIDIA.
+Mi configuración de escritorio en dos etapas: la actual, sobre [Omarchy](https://omarchy.org)
+en CachyOS (2026), y la de junio de 2025, con Arch Linux, Hyprland, Waybar y zsh en una laptop
+con GPU NVIDIA.
+
+## Omarchy (actual)
+
+Omarchy trae sus valores por defecto en `~/.local/share/omarchy`. `omarchy/` guarda solo lo
+que cambié encima de eso:
+
+| Archivo | Qué hace |
+|---|---|
+| `hypr/*.lua` | Hyprland con la configuración en Lua: monitores, teclado y touchpad, atajos (incluido 1Password), apariencia y autoarranque |
+| `hypr/hypridle.conf`, `hyprlock.conf`, `hyprsunset.conf` | Bloqueo e inactividad, pantalla de bloqueo y luz nocturna |
+| `waybar/config.jsonc`, `style.css` | Barra con reloj horizontal y vertical, clima, actualizaciones, grabación de pantalla y el indicador de Jarvis |
+| `waybar/scripts/jarvis-indicator.sh` | Muestra si mi asistente por voz está escuchando, pensando o hablando (lee `~/.cache/jarvis-voz/state.json`) |
+| `starship.toml` | Prompt de la terminal |
+
+```bash
+./install.sh --omarchy --prueba
+./install.sh --omarchy
+```
+
+## 2025: Arch + Hyprland
 
 | Archivo | Qué hace |
 |---|---|
