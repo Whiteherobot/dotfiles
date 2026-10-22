@@ -22,7 +22,7 @@ Esta laptop recibió muchas críticas desde que salió. Al pasarla a Linux, casi
 
 ![Waybar con la música sonando](docs/img/waybar.png)
 
-- **Tema:** Aether, una paleta propia en salvia y verde azulado. Es la misma que usan Pliego y Forjia. El fondo es [wallhaven-xekydd](https://wallhaven.cc/w/xekydd); el instalador lo descarga desde su fuente original, no va en el repo. Neovim usa `aether.nvim` con la misma paleta (`neovim.lua` del tema); sin ese archivo LazyVim falla con `Failed to load plugins.theme`.
+- **Tema:** Aether, una paleta propia en salvia y verde azulado. Es la misma que usan Pliego y Forjia. El fondo es [wallhaven-xekydd](https://wallhaven.cc/w/xekydd); el instalador lo descarga desde su fuente original, no va en el repo. Neovim usa `aether.nvim` con la misma paleta (`neovim.lua` del tema). Los temas sin `neovim.lua` propio lo reciben de `config/omarchy/themed/neovim.lua.tpl`, que Omarchy rellena con los colores del tema al aplicarlo; sin eso LazyVim falla con `Failed to load plugins.theme`.
 - **Waybar:** a la derecha muestra barras de música (cava) y "ahora suena" (playerctl) cuando hay algo sonando, y se ocultan en silencio. Funciona con Apple Music, Spotify, YouTube y cualquier otro audio.
 - **Teclado:** toma el color del tema. Con música, pulsa con los graves.
 

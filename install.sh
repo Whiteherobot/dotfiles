@@ -26,6 +26,7 @@ for f in "$repo"/config/hypr/*; do enlaces+=("config/hypr/${f##*/}:.config/hypr/
 for f in "$repo"/config/waybar/scripts/*; do enlaces+=("config/waybar/scripts/${f##*/}:.config/waybar/scripts/${f##*/}"); done
 for f in "$repo"/config/cava/*; do enlaces+=("config/cava/${f##*/}:.config/cava/${f##*/}"); done
 for f in "$repo"/config/systemd/user/*; do enlaces+=("config/systemd/user/${f##*/}:.config/systemd/user/${f##*/}"); done
+for f in "$repo"/config/omarchy/themed/*; do enlaces+=("config/omarchy/themed/${f##*/}:.config/omarchy/themed/${f##*/}"); done
 for f in "$repo"/bin/*; do enlaces+=("bin/${f##*/}:.local/bin/${f##*/}"); done
 enlaces+=(
   "config/waybar/config.jsonc:.config/waybar/config.jsonc"
