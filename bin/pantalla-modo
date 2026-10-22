@@ -1,0 +1,36 @@
+#!/bin/bash
+# Menú para elegir cómo usar una pantalla externa o un proyector (como Win+P en Windows).
+# Usa los toggles que trae Omarchy: omarchy-hyprland-monitor-internal-mirror e -internal.
+
+if pgrep -f "walker.*--dmenu" >/dev/null; then
+  walker --close >/dev/null 2>&1
+  exit 0
+fi
+
+if ! omarchy-hw-external-monitors; then
+  omarchy-notification-send -g 󰍹 "No hay ninguna pantalla externa conectada" \
+    "Conecta el proyector o el monitor (HDMI o USB-C) y vuelve a intentar."
+  exit 1
+fi
+
+opcion=$(printf '%s\n' \
+  "󰍺  Duplicar (lo mismo en las dos)" \
+  "󰍹  Extender (la externa es otra pantalla)" \
+  "󰶐  Solo la pantalla externa" |
+  omarchy-launch-walker --dmenu --width 340 --minheight 1 --maxheight 300 -p "Pantalla…" 2>/dev/null)
+
+case "$opcion" in
+  *Duplicar*)
+    omarchy-hyprland-monitor-internal on
+    omarchy-hyprland-monitor-internal-mirror on
+    ;;
+  *Extender*)
+    omarchy-hyprland-monitor-internal-mirror off
+    omarchy-hyprland-monitor-internal on
+    ;;
+  *Solo*)
+    # Apagar la interna exige que el espejo esté desactivado.
+    omarchy-hyprland-monitor-internal-mirror off
+    omarchy-hyprland-monitor-internal off
+    ;;
+esac
