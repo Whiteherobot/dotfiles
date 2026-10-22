@@ -1,0 +1,47 @@
+-- Aether hecho a mano no trae neovim.lua (Omarchy no tiene plantilla para Neovim),
+-- así que se usa aether.nvim con la misma paleta de colors.toml.
+return {
+	{
+		"bjarneo/aether.nvim",
+		lazy = false,
+		priority = 1000,
+		opts = {
+			colors = {
+				bg = "#040808",
+				dark_bg = "#030606",
+				darker_bg = "#020404",
+				lighter_bg = "#1d2121",
+				fg = "#BDD0C5",
+				dark_fg = "#8e9c94",
+				light_fg = "#c7d7ce",
+				bright_fg = "#cedcd4",
+				muted = "#575f5f",
+				red = "#8e9b84",
+				yellow = "#d8fde2",
+				orange = "#9faa96",
+				green = "#abccb9",
+				cyan = "#b4e7d8",
+				blue = "#648887",
+				purple = "#89b5bc",
+				brown = "#5f665a",
+				bright_red = "#a1b295",
+				bright_yellow = "#d2ffde",
+				bright_green = "#bae5cd",
+				bright_cyan = "#c2ffee",
+				bright_blue = "#739f9d",
+				bright_purple = "#94ced7",
+				accent = "#648887",
+				cursor = "#BDD0C5",
+				foreground = "#BDD0C5",
+				background = "#040808",
+				selection = "#1d2121",
+			},
+		},
+	},
+	{
+		"LazyVim/LazyVim",
+		opts = {
+			colorscheme = "aether",
+		},
+	},
+}
