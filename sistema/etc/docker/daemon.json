@@ -1,0 +1,17 @@
+{
+    "bip": "172.17.0.1/16",
+    "dns": [
+        "172.17.0.1"
+    ],
+    "log-driver": "json-file",
+    "log-opts": {
+        "max-file": "5",
+        "max-size": "10m"
+    },
+    "runtimes": {
+        "nvidia": {
+            "args": [],
+            "path": "nvidia-container-runtime"
+        }
+    }
+}
