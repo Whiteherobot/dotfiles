@@ -9,25 +9,21 @@ jobs:
   revisar:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - run: sudo apt-get install -y zsh shellcheck lua5.4
+      - uses: actions/checkout@v5
+      - run: sudo apt-get install -y shellcheck lua5.4
       - name: Scripts
-        run: shellcheck install.sh omarchy/waybar/scripts/jarvis-indicator.sh
-      - name: Configuración de Hyprland en Lua (Omarchy)
-        run: for f in omarchy/hypr/*.lua; do luac5.4 -p "$f"; done
-      - name: .zshrc
-        run: zsh -n zsh/.zshrc
-      - name: Configuración de Waybar
-        run: jq empty waybar/config
-      - name: Instalar en un HOME vacío y volver a correr
+        run: shellcheck install.sh sistema/instalar-sistema.sh config/waybar/scripts/*.sh bin/kbd-music-toggle bin/pantalla-modo
+      - name: Teclado reactivo (Python)
+        run: python3 -m py_compile bin/kbd-music
+      - name: Hyprland en Lua
+        run: for f in config/hypr/*.lua; do luac5.4 -p "$f"; done
+      - name: JSON (Waybar y Docker)
+        run: jq empty config/waybar/config.jsonc sistema/etc/docker/daemon.json
+      - name: Instalar en un HOME vacío, repetir y respaldar lo existente
         run: |
           export HOME="$(mktemp -d)"
-          echo viejo > "$HOME/.zshrc"
-          ./install.sh
-          ./install.sh | grep -c "ya enlazado" | grep -qx 4
-          test "$(cat "$HOME"/.dotfiles-respaldo/*/.zshrc)" = viejo
-      - name: Instalar la configuración de Omarchy en un HOME vacío
-        run: |
-          export HOME="$(mktemp -d)"
-          ./install.sh --omarchy | grep -c "^enlazado" | grep -qx 15
-          ./install.sh --omarchy | grep -c "ya enlazado" | grep -qx 15
+          mkdir -p "$HOME/.config/waybar" && echo viejo > "$HOME/.config/waybar/style.css"
+          total=$(./install.sh | grep -c "^enlazado")
+          test "$(./install.sh | grep -c "ya enlazado")" = "$total"
+          test "$(cat "$HOME"/.dotfiles-respaldo/*/.config/waybar/style.css)" = viejo
+          test -f "$HOME/.config/omarchy/themes/aether/colors.toml"
