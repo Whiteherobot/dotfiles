@@ -10,6 +10,14 @@ Esta laptop recibió muchas críticas desde que salió. Al pasarla a Linux, casi
 
 ## Cómo se ve
 
+![Escritorio con el fondo y la Waybar](docs/img/1-escritorio.jpg)
+
+| Lanzador de apps (`SUPER + SPACE`) | Menú de Omarchy (`SUPER + ALT + SPACE`) |
+| --- | --- |
+| ![Lanzador de apps](docs/img/2-lanzador.jpg) | ![Menú de Omarchy](docs/img/4-menu.jpg) |
+
+![Ventanas en mosaico: fastfetch, btop y los atajos](docs/img/3-mosaico.jpg)
+
 ![Paleta del tema Aether](docs/img/paleta.png)
 
 ![Waybar con la música sonando](docs/img/waybar.png)
