@@ -23,6 +23,8 @@ hl.bind("SUPER + SHIFT + E", hl.dsp.exec_cmd([[omarchy-launch-webapp "https://ap
 hl.bind("SUPER + SHIFT + Y", hl.dsp.exec_cmd([[omarchy-launch-webapp "https://youtube.com/"]]), { description = "YouTube" })
 hl.bind("SUPER + SHIFT + ALT + G", hl.dsp.exec_cmd([[omarchy-launch-or-focus-webapp WhatsApp "https://web.whatsapp.com/"]]), { description = "WhatsApp" })
 hl.bind("SUPER + SHIFT + CTRL + G", hl.dsp.exec_cmd([[omarchy-launch-or-focus-webapp "Google Messages" "https://messages.google.com/web/conversations"]]), { description = "Google Messages" })
+hl.bind("SUPER + SHIFT + CTRL + M", hl.dsp.exec_cmd([[omarchy-launch-or-focus-webapp "Apple Music" "https://music.apple.com/"]]), { description = "Apple Music" })
+hl.bind("SUPER + SHIFT + CTRL + K", hl.dsp.exec_cmd("kbd-music-toggle"), { description = "Teclado musical" })
 hl.bind("SUPER + SHIFT + P", hl.dsp.exec_cmd([[omarchy-launch-or-focus-webapp "Google Photos" "https://photos.google.com/"]]), { description = "Google Photos" })
 hl.bind("SUPER + SHIFT + X", hl.dsp.exec_cmd([[omarchy-launch-webapp "https://x.com/"]]), { description = "X" })
 hl.bind("SUPER + SHIFT + ALT + X", hl.dsp.exec_cmd([[omarchy-launch-webapp "https://x.com/compose/post"]]), { description = "X Post" })
@@ -38,3 +40,10 @@ hl.bind("SUPER + SHIFT + ALT + X", hl.dsp.exec_cmd([[omarchy-launch-webapp "http
 -- hl.bind("SUPER + SHIFT + S", hl.dsp.exec_cmd("omarchy-capture-screenshot"))
 -- hl.bind("SUPER + H", hl.dsp.exec_cmd("voxtype record toggle"))
 -- hl.bind("SUPER + PERIOD", hl.dsp.exec_cmd("omarchy-launch-walker -m symbols"))
+
+-- Modo de pantalla externa / proyector. La tecla de proyectar de la laptop manda SUPER + P
+-- (como Win+P), que en Omarchy era "Pseudo window" y solo achicaba las ventanas.
+hl.unbind("SUPER + P")
+hl.bind("SUPER + P", hl.dsp.exec_cmd("pantalla-modo"), { description = "Pantalla externa / proyector" })
+hl.bind("XF86Display", hl.dsp.exec_cmd("pantalla-modo"), { description = "Pantalla externa / proyector" })
+hl.bind("SUPER + ALT + P", hl.dsp.window.pseudo(), { description = "Pseudo window" })

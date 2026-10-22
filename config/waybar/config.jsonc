@@ -8,6 +8,8 @@
   "modules-left": ["custom/omarchy", "hyprland/workspaces"],
   "modules-center": ["clock#horizontal", "clock#vertical", "custom/weather", "custom/update", "custom/voxtype", "custom/jarvis", "custom/screenrecording-indicator", "custom/idle-indicator", "custom/notification-silencing-indicator"],
   "modules-right": [
+    "custom/visualizer",
+    "custom/now-playing",
     "group/tray-expander",
     "bluetooth",
     "network",
@@ -201,6 +203,20 @@
     "tooltip": true,
     "on-click-right": "omarchy-voxtype-config",
     "on-click": "omarchy-voxtype-model"
+  },
+  "custom/visualizer": {
+    "exec": "~/.config/waybar/scripts/visualizer.sh",
+    "tooltip": false,
+    "on-click": "omarchy-launch-audio"
+  },
+  "custom/now-playing": {
+    "exec": "~/.config/waybar/scripts/now-playing.sh",
+    "return-type": "json",
+    "on-click": "playerctl play-pause",
+    "on-click-right": "playerctl next",
+    "on-click-middle": "playerctl previous",
+    "on-scroll-up": "playerctl next",
+    "on-scroll-down": "playerctl previous"
   },
   "tray": {
     "icon-size": 12,
