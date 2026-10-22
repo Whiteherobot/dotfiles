@@ -1,0 +1,7 @@
+#!/bin/bash
+# Prende o apaga el teclado reactivo a la música (atajo SUPER + SHIFT + CTRL + K)
+if systemctl --user is-active --quiet kbd-music; then
+  systemctl --user disable --now kbd-music && notify-send -u low "Teclado musical" "Apagado: vuelve al color del tema"
+else
+  systemctl --user enable --now kbd-music && notify-send -u low "Teclado musical" "Encendido: el teclado sigue los graves"
+fi

@@ -1,0 +1,13 @@
+[Unit]
+Description=Teclado ASUS ROG reactivo a la música (cava + asusctl)
+After=pipewire.service asusd.service
+
+[Service]
+ExecStart=%h/.local/bin/kbd-music
+ExecStopPost=/usr/bin/env omarchy-theme-set-keyboard-asus-rog
+Restart=on-failure
+RestartSec=5
+Environment=PATH=%h/.local/bin:%h/.local/share/omarchy/bin:/usr/local/bin:/usr/bin
+
+[Install]
+WantedBy=graphical-session.target
