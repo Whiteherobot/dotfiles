@@ -47,8 +47,9 @@ config/uwsm/env       variables de la sesión (GPU híbrida)
 config/waybar/        barra con música, indicadores y sus scripts
 config/cava/          barras de la Waybar y graves para el teclado
 config/omarchy/       tema Aether
-config/systemd/user/  teclado reactivo y recuperación del monitor interno
-bin/                  kbd-music, kbd-music-toggle, pantalla-modo
+config/faro/          LLM local: Modelfile, ajustes de SearXNG e ícono
+config/systemd/user/  teclado reactivo, recuperación del monitor interno y LLM local
+bin/                  kbd-music, kbd-music-toggle, pantalla-modo, llm-cargador, faro-abrir
 sistema/etc/          arreglos de sistema (se copian aparte, con sudo)
 ```
 
@@ -77,8 +78,26 @@ sudo ./sistema/instalar-sistema.sh   # muestra cada cambio en /etc y pide confir
 | `Super + P` o tecla de proyectar | Elegir cómo usar una pantalla externa o un proyector |
 | `Super + Shift + Ctrl + M` | Apple Music (app web, como WhatsApp en Omarchy) |
 | `Super + Shift + Ctrl + K` | Prender o apagar el teclado reactivo a la música |
+| `Super + I` | Abrir Faro, el asistente local (ver abajo) |
+| `Super + D` | Mostrar u ocultar el Dojo (widgets de práctica; el proyecto es privado, sin él no hace nada) |
 
 En la Waybar, sobre "ahora suena": clic pausa o reanuda, clic derecho pasa a la siguiente y la rueda cambia de canción.
+
+## LLM local (opcional)
+
+Un asistente que corre en la GPU, sin nube: [Ollama](https://ollama.com) con Qwen3.5 9B, [Open WebUI](https://openwebui.com) como app ("Faro", `Super + I`) y [SearXNG](https://searxng.org) para que busque en la web. Solo escucha en `127.0.0.1`.
+
+Se prende al conectar el cargador y se apaga con batería (`llm-cargador`), porque la GPU la drena y calienta la laptop. El cargador de esta laptop tiene microcortes, así que espera 60 s sin corriente antes de apagarlo.
+
+```bash
+# con ollama y docker instalados, install.sh genera las claves y activa llm-cargador
+ollama pull qwen3.5:9b
+ollama create faro -f config/faro/Modelfile
+```
+
+- Si el adaptador no es `ADP0`, cambiarlo con `LLM_ADAPTADOR` (ver `ls /sys/class/power_supply`).
+- Las claves (`~/.local/share/faro/secreto.env` y la de SearXNG) se generan en cada instalación y no van al repo.
+- Para que busque en la web, en Open WebUI: *Ajustes de administración → Búsqueda web → SearXNG*, con `http://127.0.0.1:8888/search?q=<query>`.
 
 ## Historia
 
