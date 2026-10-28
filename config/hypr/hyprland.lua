@@ -22,3 +22,6 @@ require("default.hypr.toggles")
 
 -- Add any other personal Hyprland configuration below.
 -- o.window("qemu", { workspace = "5" })
+
+-- Dojo (gym de código): vidrio esmerilado en los widgets de Quickshell.
+hl.layer_rule({ match = { namespace = "^dojo-" }, blur = true, ignore_alpha = 0.05 })

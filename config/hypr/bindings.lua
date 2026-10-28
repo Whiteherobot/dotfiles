@@ -21,6 +21,7 @@ hl.bind("SUPER + SHIFT + ALT + A", hl.dsp.exec_cmd([[omarchy-launch-webapp "http
 hl.bind("SUPER + SHIFT + C", hl.dsp.exec_cmd([[omarchy-launch-webapp "https://app.hey.com/calendar/weeks/"]]), { description = "Calendar" })
 hl.bind("SUPER + SHIFT + E", hl.dsp.exec_cmd([[omarchy-launch-webapp "https://app.hey.com"]]), { description = "Email" })
 hl.bind("SUPER + SHIFT + Y", hl.dsp.exec_cmd([[omarchy-launch-webapp "https://youtube.com/"]]), { description = "YouTube" })
+hl.bind("SUPER + I", hl.dsp.exec_cmd("faro-abrir"), { description = "Faro: asistente local" })
 hl.bind("SUPER + SHIFT + ALT + G", hl.dsp.exec_cmd([[omarchy-launch-or-focus-webapp WhatsApp "https://web.whatsapp.com/"]]), { description = "WhatsApp" })
 hl.bind("SUPER + SHIFT + CTRL + G", hl.dsp.exec_cmd([[omarchy-launch-or-focus-webapp "Google Messages" "https://messages.google.com/web/conversations"]]), { description = "Google Messages" })
 hl.bind("SUPER + SHIFT + CTRL + M", hl.dsp.exec_cmd([[omarchy-launch-or-focus-webapp "Apple Music" "https://music.apple.com/"]]), { description = "Apple Music" })
@@ -30,6 +31,7 @@ hl.bind("SUPER + SHIFT + X", hl.dsp.exec_cmd([[omarchy-launch-webapp "https://x.
 hl.bind("SUPER + SHIFT + ALT + X", hl.dsp.exec_cmd([[omarchy-launch-webapp "https://x.com/compose/post"]]), { description = "X Post" })
 
 -- Add extra bindings below.
+hl.bind("SUPER + D", hl.dsp.exec_cmd("quickshell -c dojo ipc call dojo alternar"), { description = "Dojo: práctica del día" })
 -- hl.bind("SUPER + SHIFT + R", hl.dsp.exec_cmd("alacritty -e ssh your-server"), { description = "SSH" })
 
 -- Overwrite existing bindings with hl.unbind() first if needed.
