@@ -47,9 +47,10 @@ config/uwsm/env       variables de la sesión (GPU híbrida)
 config/waybar/        barra con música, indicadores y sus scripts
 config/cava/          barras de la Waybar y graves para el teclado
 config/omarchy/       tema Aether
+config/quickshell/    widgets del escritorio: pendientes, calendario y música
 config/faro/          LLM local: Modelfile, ajustes de SearXNG e ícono
 config/systemd/user/  teclado reactivo, recuperación del monitor interno y LLM local
-bin/                  kbd-music, kbd-music-toggle, pantalla-modo, llm-cargador, faro-abrir
+bin/                  kbd-music, kbd-music-toggle, pantalla-modo, llm-cargador, faro-abrir, escritorio
 sistema/etc/          arreglos de sistema (se copian aparte, con sudo)
 ```
 
@@ -79,9 +80,29 @@ sudo ./sistema/instalar-sistema.sh   # muestra cada cambio en /etc y pide confir
 | `Super + Shift + Ctrl + M` | Apple Music (app web, como WhatsApp en Omarchy) |
 | `Super + Shift + Ctrl + K` | Prender o apagar el teclado reactivo a la música |
 | `Super + I` | Abrir Faro, el asistente local (ver abajo) |
-| `Super + D` | Mostrar u ocultar el Dojo (widgets de práctica; el proyecto es privado, sin él no hace nada) |
+| `Super + D` | Pendientes, calendario y música encima de todo (Esc o clic fuera para cerrar) |
 
 En la Waybar, sobre "ahora suena": clic pausa o reanuda, clic derecho pasa a la siguiente y la rueda cambia de canción.
+
+## Widgets del escritorio
+
+Tarjetas de vidrio arriba a la derecha hechas con [Quickshell](https://quickshell.org), que toman los colores del tema:
+
+- **Pendientes:** un checklist en Markdown (`- [ ]` por hacer, `- [/]` en curso, `- [x]` hecho), que se puede editar a mano o en Obsidian. Clic en el círculo la marca hecha y clic en el texto la pone en curso. El encabezado abre un tablero kanban. Si una tarea termina en `[[Nota]]`, el tablero muestra el avance de esa nota.
+- **Calendario:** Google Calendar por su dirección secreta iCal (solo lectura, sin OAuth). Soporta eventos repetidos y funciona sin conexión con la última copia.
+- **Ahora suena:** carátula, barras (cava) y controles; se oculta sin música.
+
+Requiere `quickshell` y Node 22.18 o más nuevo (corre TypeScript directo) (`omarchy pkg add quickshell`, Node con `mise use -g node`). La configuración es local y no va al repo:
+
+```bash
+mkdir -p ~/.config/escritorio
+# Opcional: dónde está el archivo de pendientes (por defecto ~/Documents/Pendientes.md)
+echo '{ "pendientes": "~/Notas/Pendientes.md", "notas": "~/Notas" }' > ~/.config/escritorio/config.json
+# Calendario: Google Calendar → Configuración → tu calendario → "Dirección secreta en formato iCal"
+echo 'Personal | https://calendar.google.com/calendar/ical/…/basic.ics' > ~/.config/escritorio/calendarios.txt
+chmod 600 ~/.config/escritorio/calendarios.txt
+escritorio tarea agregar "Probar los widgets"
+```
 
 ## LLM local (opcional)
 
