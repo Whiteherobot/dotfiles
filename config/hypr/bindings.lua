@@ -31,7 +31,7 @@ hl.bind("SUPER + SHIFT + X", hl.dsp.exec_cmd([[omarchy-launch-webapp "https://x.
 hl.bind("SUPER + SHIFT + ALT + X", hl.dsp.exec_cmd([[omarchy-launch-webapp "https://x.com/compose/post"]]), { description = "X Post" })
 
 -- Add extra bindings below.
-hl.bind("SUPER + D", hl.dsp.exec_cmd("quickshell -c dojo ipc call dojo alternar"), { description = "Dojo: práctica del día" })
+hl.bind("SUPER + D", hl.dsp.exec_cmd("quickshell -c escritorio ipc call escritorio alternar"), { description = "Escritorio: pendientes y calendario" })
 -- hl.bind("SUPER + SHIFT + R", hl.dsp.exec_cmd("alacritty -e ssh your-server"), { description = "SSH" })
 
 -- Overwrite existing bindings with hl.unbind() first if needed.

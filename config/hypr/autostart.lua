@@ -4,5 +4,5 @@
 -- end)
 o.exec_on_start("hyprlock")
 
--- Dojo: widgets de práctica (racha y pendientes).
-o.exec_on_start("uwsm-app -- quickshell -c dojo")
+-- Widgets del escritorio: pendientes, calendario y música.
+o.exec_on_start("uwsm-app -- quickshell -c escritorio")
