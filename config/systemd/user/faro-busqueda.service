@@ -1,0 +1,13 @@
+[Unit]
+Description=Faro: SearXNG local (búsqueda web para Open WebUI; sigue a ollama.service)
+PartOf=ollama.service
+After=docker.service
+
+[Service]
+ExecStartPre=-/usr/bin/docker rm -f faro-busqueda
+ExecStart=/usr/bin/docker run --rm --name faro-busqueda -p 127.0.0.1:8888:8080 \
+  -v %h/.local/share/faro/searxng:/etc/searxng \
+  searxng/searxng:2026.10.19-81371861f
+ExecStop=/usr/bin/docker stop faro-busqueda
+Restart=on-failure
+RestartSec=10

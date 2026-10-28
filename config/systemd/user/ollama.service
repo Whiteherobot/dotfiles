@@ -1,0 +1,17 @@
+[Unit]
+Description=Ollama: LLM local (lo prende y apaga llm-cargador según el cargador)
+# Faro (Open WebUI) se prende con el modelo y se apaga con él (PartOf en faro.service).
+Wants=faro.service faro-busqueda.service faro-mcp.service
+
+[Service]
+Environment=PATH=%h/.local/bin:/usr/local/bin:/usr/bin
+ExecStart=/usr/bin/env ollama serve
+Environment=OLLAMA_HOST=127.0.0.1:11434
+# Mientras haya cargador el modelo queda en la GPU (sin recargas de ~30 s); sin cargador se apaga todo.
+Environment=OLLAMA_KEEP_ALIVE=-1
+Environment=OLLAMA_FLASH_ATTENTION=1
+# Caché KV en 8 bits: deja contexto de 16k dentro de los 8 GB de la 4060.
+Environment=OLLAMA_KV_CACHE_TYPE=q8_0
+Environment=OLLAMA_CONTEXT_LENGTH=16384
+Restart=on-failure
+RestartSec=5

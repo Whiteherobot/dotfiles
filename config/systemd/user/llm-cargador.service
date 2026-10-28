@@ -1,0 +1,13 @@
+[Unit]
+Description=Modelo local: prende/apaga Ollama según el cargador y avisa
+After=graphical-session.target
+PartOf=graphical-session.target
+
+[Service]
+ExecStart=%h/.local/bin/llm-cargador
+Environment=PATH=/usr/local/bin:/usr/bin
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=graphical-session.target

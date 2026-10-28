@@ -12,7 +12,7 @@ jobs:
       - uses: actions/checkout@v5
       - run: sudo apt-get install -y shellcheck lua5.4
       - name: Scripts
-        run: shellcheck install.sh sistema/instalar-sistema.sh config/waybar/scripts/*.sh bin/kbd-music-toggle bin/pantalla-modo
+        run: shellcheck install.sh sistema/instalar-sistema.sh config/waybar/scripts/*.sh bin/kbd-music-toggle bin/pantalla-modo bin/faro-abrir bin/llm-cargador
       - name: Teclado reactivo (Python)
         run: python3 -m py_compile bin/kbd-music
       - name: Hyprland en Lua

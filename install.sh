@@ -87,6 +87,26 @@ if ! $prueba && hay systemctl; then
   fi
 fi
 
+# LLM local (opcional): Ollama + Open WebUI ("Faro") + SearXNG; se prende con el cargador.
+# Las claves se generan aquí y no se pisan si ya existen.
+faro_datos="$HOME/.local/share/faro"
+if ! $prueba && hay ollama && hay docker && hay systemctl; then
+  clave() { od -An -N32 -tx1 /dev/urandom | tr -d ' \n'; }
+  mkdir -p "$faro_datos/searxng" "$HOME/.local/share/icons/hicolor/scalable/apps"
+  cp "$repo/config/faro/faro.svg" "$HOME/.local/share/icons/hicolor/scalable/apps/"
+  if [[ ! -s $faro_datos/secreto.env ]]; then
+    (umask 077; echo "WEBUI_SECRET_KEY=$(clave)" > "$faro_datos/secreto.env")
+  fi
+  if [[ ! -e $faro_datos/searxng/settings.yml ]]; then
+    sed "s/se-genera-al-instalar/$(clave)/" "$repo/config/faro/searxng/settings.yml" > "$faro_datos/searxng/settings.yml"
+  fi
+  systemctl --user enable llm-cargador.service >/dev/null 2>&1 && echo "servicio     llm-cargador (LLM local con el cargador)"
+  [[ -d $HOME/.ollama/models/manifests/registry.ollama.ai/library/faro ]] ||
+    echo "aviso: falta el modelo: ollama pull qwen3.5:9b && ollama create faro -f $repo/config/faro/Modelfile"
+elif ! $prueba; then
+  echo "aviso: sin ollama o docker; el LLM local (Super+I) queda sin activar"
+fi
+
 if [[ -d $respaldo ]]; then echo "respaldo en  $(corto "$respaldo")"; fi
 if ! $prueba; then
   cat <<'EOF'

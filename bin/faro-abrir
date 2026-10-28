@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# Abre Faro como app. Sin cargador avisa que está en pausa; si recién arranca, espera a que responda.
+URL=http://127.0.0.1:3939
+ADAPTADOR=${LLM_ADAPTADOR:-/sys/class/power_supply/ADP0/online}
+if [[ $(cat "$ADAPTADOR" 2>/dev/null) != 1 ]]; then
+    notify-send -a Faro -i faro "Faro en pausa" "Conecta el cargador para usarlo."
+    exit 0
+fi
+if ! curl -sf "$URL/health" >/dev/null; then
+    systemctl --user start ollama.service
+    notify-send -a Faro -i faro "Faro arrancando…" "Se abre en cuanto esté listo."
+    for _ in $(seq 180); do
+        curl -sf "$URL/health" >/dev/null && break
+        sleep 1
+    done
+fi
+exec omarchy-launch-webapp "$URL"

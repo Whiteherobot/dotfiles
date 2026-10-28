@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+# Vigilante del cargador: con cargador prende Ollama y avisa cuando ya responde;
+# con batería lo apaga (la GPU drena la batería y calienta). Corre como llm-cargador.service.
+ADAPTADOR=${LLM_ADAPTADOR:-/sys/class/power_supply/ADP0/online}
+# El cargador tiene microcortes de ~10 s: solo se pausa si sigue desconectado este tiempo.
+ESPERA_PAUSA=${LLM_ESPERA_PAUSA:-60}
+anterior=""
+sin_cargador_desde=""
+
+avisar() { notify-send -a Faro -i "$2" "$1" "$3"; }
+
+activar() {
+    systemctl --user start ollama.service
+    for _ in $(seq 60); do
+        if curl -sf http://127.0.0.1:11434/api/version >/dev/null; then
+            # Precarga Faro en la GPU para que la primera respuesta no espere la carga.
+            curl -sf http://127.0.0.1:11434/api/generate -d '{"model":"faro","keep_alive":-1}' >/dev/null
+            avisar "Faro activado" faro "Modelo local listo mientras el cargador esté conectado (Super+I)."
+            return
+        fi
+        sleep 1
+    done
+    avisar "Faro no arrancó" dialog-error "Revisa: journalctl --user -u ollama"
+}
+
+pausar() {
+    systemctl --user stop ollama.service
+    avisar "Faro en pausa" faro "Sin cargador: se activa al volver a conectarlo."
+}
+
+while true; do
+    actual=$(cat "$ADAPTADOR" 2>/dev/null || echo 0)
+    if [[ "$actual" == 0 && "$anterior" == 1 ]]; then
+        sin_cargador_desde=${sin_cargador_desde:-$SECONDS}
+        (( SECONDS - sin_cargador_desde < ESPERA_PAUSA )) && { sleep 5; continue; }
+    fi
+    sin_cargador_desde=""
+    if [[ "$actual" != "$anterior" ]]; then
+        if [[ "$actual" == 1 ]]; then activar; else
+            # Al arrancar con batería no hace falta avisar: nunca estuvo prendido.
+            if [[ -n "$anterior" ]]; then pausar; else systemctl --user stop ollama.service; fi
+        fi
+        anterior=$actual
+    fi
+    sleep 5
+done

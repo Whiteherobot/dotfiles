@@ -1,0 +1,21 @@
+[Unit]
+Description=Faro: Open WebUI sobre el modelo local (se prende y apaga junto con ollama.service)
+PartOf=ollama.service
+After=ollama.service docker.service
+
+[Service]
+# Clave fija: si cambia en cada arranque, la sesión de la app se invalida.
+EnvironmentFile=%h/.local/share/faro/secreto.env
+ExecStartPre=-/usr/bin/docker rm -f faro
+# Solo escucha en 127.0.0.1: sin login porque nadie más en la red puede entrar.
+ExecStart=/usr/bin/docker run --rm --name faro --network host \
+  -v faro-datos:/app/backend/data \
+  -e HOST=127.0.0.1 -e PORT=3939 \
+  -e OLLAMA_BASE_URL=http://127.0.0.1:11434 \
+  -e WEBUI_NAME=Faro -e WEBUI_AUTH=False -e WEBUI_SECRET_KEY \
+  -e ENABLE_OPENAI_API=False -e DEFAULT_MODELS=faro:latest -e DEFAULT_LOCALE=es-ES \
+  -e ANONYMIZED_TELEMETRY=false -e DO_NOT_TRACK=true -e SCARF_NO_ANALYTICS=true \
+  ghcr.io/open-webui/open-webui:v0.12.3
+ExecStop=/usr/bin/docker stop faro
+Restart=on-failure
+RestartSec=10
