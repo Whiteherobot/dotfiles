@@ -24,7 +24,7 @@ Esta laptop recibió muchas críticas desde que salió. Al pasarla a Linux, casi
 
 - **Tema:** Aether, una paleta propia en salvia y verde azulado. Es la misma que usan Pliego y Forjia. El fondo es [wallhaven-xekydd](https://wallhaven.cc/w/xekydd); el instalador lo descarga desde su fuente original, no va en el repo. Neovim usa `aether.nvim` con la misma paleta (`neovim.lua` del tema). Los temas sin `neovim.lua` propio lo reciben de `config/omarchy/themed/neovim.lua.tpl`, que Omarchy rellena con los colores del tema al aplicarlo; sin eso LazyVim falla con `Failed to load plugins.theme`.
 - **Waybar:** a la derecha muestra barras de música (cava) y "ahora suena" (playerctl) cuando hay algo sonando, y se ocultan en silencio. Funciona con Apple Music, Spotify, YouTube y cualquier otro audio.
-- **Teclado:** toma el color del tema. Con música, pulsa con los graves. Si lo que suena tiene carátula (una canción en Spotify o Apple Music, un video de YouTube), toma su color dominante mientras suena; sin carátula (juegos, llamadas) pulsa con el color del tema, y en silencio vuelve a él.
+- **Teclado:** toma el color del tema. Con música, pulsa con los graves. Si tienes un juego con el foco (Steam/Proton, gamescope o cualquier app que se declare juego), toma el color dominante de su ventana: la lee cada 3 s al 5 % de tamaño, solo en memoria, y no mira el resto de la pantalla. Si no, y lo que suena tiene carátula (una canción en Spotify o Apple Music, un video de YouTube), toma su color. Sin nada de eso (una llamada) pulsa con el color del tema, y en silencio vuelve a él. `Super + Shift + Ctrl + K` lo apaga todo.
 
 ## Qué resuelve
 

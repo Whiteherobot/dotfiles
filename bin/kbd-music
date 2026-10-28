@@ -2,14 +2,19 @@
 """Teclado ASUS ROG reactivo a la música.
 
 Lee los graves de cava y lleva el color del teclado desde un color base hasta su versión
-brillante. Si lo que suena tiene carátula (canción o video, vía MPRIS), el color sale de
-ella; si no (un juego, una llamada), del acento del tema. En silencio vuelve al color del
-tema (omarchy). El teclado es de una sola zona: todo pulsa junto.
+brillante. El color sale de, en este orden:
+  1. el juego que tiene el foco: su ventana, reducida al 5 % y leída en memoria (nunca se
+     guarda ni se mira el resto de la pantalla);
+  2. la carátula de lo que suena (canción o video, vía MPRIS);
+  3. el acento del tema (una llamada, un juego sin foco).
+En silencio vuelve al color del tema (omarchy). El teclado es de una sola zona: todo
+pulsa junto.
 
 Cuida al disco: asusd reescribe su configuración en cada cambio, así que se usan
 pocos niveles y como máximo 5 cambios por segundo, solo cuando el nivel cambia.
 """
 import colorsys
+import json
 import os
 import re
 import subprocess
@@ -24,6 +29,9 @@ MIN_INTERVAL = 0.2    # segundos entre cambios (5 por segundo como máximo)
 SILENCE_RESET = 2.0   # segundos de silencio para volver al color del tema
 THRESHOLD = 4         # nivel de graves (0-100) que se considera silencio
 ART_CHECK = 2.0       # segundos entre consultas de la carátula mientras suena algo
+GAME_CHECK = 3.0      # segundos entre lecturas de la ventana del juego
+HUE_STEP = 0.08       # en un juego el color solo cambia si el tono se mueve más de ~30°
+GAME_CLASS = re.compile(r"^(steam_app_\d+|gamescope)$")
 
 
 def theme_colors() -> tuple[tuple[int, int, int], tuple[int, int, int]]:
@@ -51,24 +59,12 @@ def playing_art() -> str:
     return ""
 
 
-def art_colors(url: str):
-    """Color dominante y vivo de la carátula, como (base, brillo); None si es gris o no se lee.
+def dominant(rgb: bytes):
+    """(tono, saturación) del color que más pesa en una imagen RGB cruda; None si es gris.
 
     Se agrupan los píxeles por tono, pesados por saturación y brillo (los grises y los
-    negros no cuentan), y se toma el tono que más pesa. Los LED necesitan colores
-    saturados: la base va a brillo 0.7 y el pico a brillo pleno, un poco más claro.
+    negros no cuentan), y se toma el grupo que más pesa.
     """
-    try:
-        if url.startswith("file://"):
-            data = open(unquote(urlparse(url).path), "rb").read()
-        else:
-            pedido = urllib.request.Request(url, headers={"User-Agent": "kbd-music/1.0"})
-            with urllib.request.urlopen(pedido, timeout=5) as r:
-                data = r.read(5_000_000)
-        rgb = subprocess.run(["magick", "-", "-resize", "48x48!", "-depth", "8", "rgb:-"],
-                             input=data, capture_output=True, check=True, timeout=10).stdout
-    except (OSError, ValueError, subprocess.SubprocessError):
-        return None
     bins: dict[int, list[float]] = {}
     for i in range(0, len(rgb) - 2, 3):
         h, sat, val = colorsys.rgb_to_hsv(rgb[i] / 255, rgb[i + 1] / 255, rgb[i + 2] / 255)
@@ -85,9 +81,57 @@ def art_colors(url: str):
     total, hw, sw, count = max(bins.values(), key=lambda b: b[0])
     if count < len(rgb) // 3 * 0.03:  # menos del 3 % de la imagen: no es su color
         return None
-    hue, sat = hw / total, max(0.65, sw / total)
+    return hw / total, sw / total
+
+
+def leds(hue: float, sat: float):
+    """Los LED necesitan colores saturados: base a brillo 0.7 y pico a brillo pleno, más claro."""
+    sat = max(0.65, sat)
     to_rgb = lambda s, v: tuple(round(c * 255) for c in colorsys.hsv_to_rgb(hue, s, v))
     return to_rgb(sat, 0.7), to_rgb(sat * 0.75, 1.0)
+
+
+def art_colors(url: str):
+    """(tono, saturación) dominante de la carátula; None si es gris o no se lee."""
+    try:
+        if url.startswith("file://"):
+            data = open(unquote(urlparse(url).path), "rb").read()
+        else:
+            pedido = urllib.request.Request(url, headers={"User-Agent": "kbd-music/1.0"})
+            with urllib.request.urlopen(pedido, timeout=5) as r:
+                data = r.read(5_000_000)
+        rgb = subprocess.run(["magick", "-", "-resize", "48x48!", "-depth", "8", "rgb:-"],
+                             input=data, capture_output=True, check=True, timeout=10).stdout
+    except (OSError, ValueError, subprocess.SubprocessError):
+        return None
+    return dominant(rgb)
+
+
+def game_window():
+    """Geometría "x,y wxh" de la ventana con foco si es un juego; None si no."""
+    try:
+        w = json.loads(subprocess.run(["hyprctl", "activewindow", "-j"], capture_output=True,
+                                      text=True, check=True, timeout=2).stdout or "{}")
+    except (OSError, ValueError, subprocess.SubprocessError):
+        return None
+    if not w or not (w.get("contentType") == "game" or GAME_CLASS.match(w.get("class", ""))):
+        return None
+    (x, y), (ancho, alto) = w["at"], w["size"]
+    return f"{x},{y} {ancho}x{alto}"
+
+
+def screen_colors(geometria: str):
+    """(tono, saturación) dominante de la ventana del juego, leída al 5 % y solo en memoria."""
+    try:
+        ppm = subprocess.run(["grim", "-g", geometria, "-s", "0.05", "-t", "ppm", "-"],
+                             capture_output=True, check=True, timeout=3).stdout
+        # Cabecera P6: "P6\n<ancho> <alto>\n255\n" y luego los píxeles RGB (un byte por canal).
+        cabecera = re.match(rb"P6\s+(\d+)\s+(\d+)\s+255\s", ppm)
+        if not cabecera:
+            return None
+        return dominant(ppm[cabecera.end():])
+    except (OSError, subprocess.SubprocessError):
+        return None
 
 
 def mix(a, b, t: float) -> str:
@@ -107,7 +151,8 @@ def restore_theme() -> None:
 def main() -> None:
     theme = theme_colors()
     base, peak = theme
-    art_url, art_cache, last_art_check = "", {}, 0.0
+    art_url, art_cache, last_art_check, last_game_check = "", {}, 0.0, 0.0
+    fuente, tono = "tema", None  # de dónde sale el color ahora y su tono (para los juegos)
     cava = subprocess.Popen(["cava", "-p", CAVA_CONF], stdout=subprocess.PIPE, text=True)
     level_sent, last_sent, last_sound, smooth = -1, 0.0, 0.0, 0.0
     try:
@@ -126,21 +171,38 @@ def main() -> None:
                 restore_theme()
                 level_sent = -1
                 theme = theme_colors()  # por si cambió el tema
-                art_url, base, peak = "", *theme
+                art_url, fuente, tono, base, peak = "", "tema", None, *theme
                 continue
 
             if now - last_sound > SILENCE_RESET:
                 continue
-            # Carátula de lo que suena: se recalcula solo cuando cambia la URL.
-            if now - last_art_check >= ART_CHECK:
-                last_art_check = now
-                url = playing_art()
-                if url != art_url:
-                    art_url = url
-                    if url and url not in art_cache:
-                        art_cache = {url: art_colors(url)}  # solo la última: no crece
-                    base, peak = (url and art_cache.get(url)) or theme
-                    level_sent = -2  # fuerza el envío con el color nuevo (-1 = ya está el del tema)
+            nuevo = None
+            # 1. Juego con foco: su pantalla manda, pero solo cambia con un salto de tono claro.
+            if now - last_game_check >= GAME_CHECK:
+                last_game_check = now
+                geometria = game_window()
+                color = screen_colors(geometria) if geometria else None
+                if color and (fuente != "juego" or abs(color[0] - tono) % 1 > HUE_STEP
+                              and 1 - abs(color[0] - tono) % 1 > HUE_STEP):
+                    nuevo = ("juego", color)
+                elif not geometria and fuente == "juego":
+                    art_url = None  # salió del juego: que se vuelva a mirar la carátula
+            # 2. Carátula de lo que suena: se recalcula solo cuando cambia la URL.
+            # (no si el juego acaba de dar color, ni mientras el juego siga con foco).
+            if nuevo is None and (fuente != "juego" or art_url is None):
+                if now - last_art_check >= ART_CHECK or art_url is None:
+                    last_art_check = now
+                    url = playing_art()
+                    if url != art_url:
+                        art_url = url
+                        if url and url not in art_cache:
+                            art_cache = {url: art_colors(url)}  # solo la última: no crece
+                        color = url and art_cache.get(url)
+                        nuevo = ("caratula", color) if color else ("tema", None)
+            if nuevo and nuevo != (fuente, tono):
+                fuente, tono = nuevo[0], nuevo[1][0] if nuevo[1] else None
+                base, peak = leds(*nuevo[1]) if nuevo[1] else theme
+                level_sent = -2  # fuerza el envío con el color nuevo (-1 = ya está el del tema)
             level = min(LEVELS, round(smooth / 100 * LEVELS))
             if level != level_sent and now - last_sent >= MIN_INTERVAL:
                 set_color(mix(base, peak, level / LEVELS))
