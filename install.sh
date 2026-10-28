@@ -33,6 +33,7 @@ enlaces+=(
   "config/waybar/style.css:.config/waybar/style.css"
   "config/uwsm/env:.config/uwsm/env"
   "config/starship.toml:.config/starship.toml"
+  "config/quickshell/escritorio:.config/quickshell/escritorio"
 )
 
 for par in "${enlaces[@]}"; do

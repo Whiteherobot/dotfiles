@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# Datos de los widgets del escritorio (pendientes y calendario); ver config/quickshell/escritorio/cli.
+# Desde Hyprland no están los shims de mise en el PATH: se prueba también la instalación de mise.
+cli="$HOME/.config/quickshell/escritorio/cli/escritorio.ts"
+node=$(command -v node || echo "$HOME/.local/share/mise/installs/node/latest/bin/node")
+exec "$node" "$cli" "$@"
