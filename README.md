@@ -24,7 +24,7 @@ Esta laptop recibió muchas críticas desde que salió. Al pasarla a Linux, casi
 
 - **Tema:** Aether, una paleta propia en salvia y verde azulado. Es la misma que usan Pliego y Forjia. El fondo es [wallhaven-xekydd](https://wallhaven.cc/w/xekydd); el instalador lo descarga desde su fuente original, no va en el repo. Neovim usa `aether.nvim` con la misma paleta (`neovim.lua` del tema). Los temas sin `neovim.lua` propio lo reciben de `config/omarchy/themed/neovim.lua.tpl`, que Omarchy rellena con los colores del tema al aplicarlo; sin eso LazyVim falla con `Failed to load plugins.theme`.
 - **Waybar:** a la derecha muestra barras de música (cava) y "ahora suena" (playerctl) cuando hay algo sonando, y se ocultan en silencio. Funciona con Apple Music, Spotify, YouTube y cualquier otro audio.
-- **Teclado:** toma el color del tema. Con música, pulsa con los graves.
+- **Teclado:** toma el color del tema. Con música, pulsa con los graves. Si lo que suena tiene carátula (una canción en Spotify o Apple Music, un video de YouTube), toma su color dominante mientras suena; sin carátula (juegos, llamadas) pulsa con el color del tema, y en silencio vuelve a él.
 
 ## Qué resuelve
 
@@ -61,7 +61,7 @@ Requiere Omarchy instalado sobre CachyOS (o Arch).
 ```bash
 git clone https://github.com/Whiteherobot/dotfiles.git ~/dotfiles
 cd ~/dotfiles
-omarchy pkg add cava playerctl jq asusctl   # instala solo los que falten
+omarchy pkg add cava playerctl jq asusctl imagemagick   # instala solo los que falten
 ./install.sh --prueba             # muestra qué haría, sin tocar nada
 ./install.sh                      # enlaza la configuración y respalda lo que exista
 omarchy theme set Aether
