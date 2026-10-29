@@ -10,7 +10,7 @@ Esta laptop recibió muchas críticas desde que salió. Al pasarla a Linux, casi
 
 ## Cómo se ve
 
-![Escritorio con el fondo y la Waybar](docs/img/1-escritorio.jpg)
+![Escritorio con el fondo y la barra](docs/img/1-escritorio.jpg)
 
 | Lanzador de apps (`SUPER + SPACE`) | Menú de Omarchy (`SUPER + ALT + SPACE`) |
 | --- | --- |
@@ -20,37 +20,38 @@ Esta laptop recibió muchas críticas desde que salió. Al pasarla a Linux, casi
 
 ![Paleta del tema Aether](docs/img/paleta.png)
 
-![Waybar con la música sonando](docs/img/waybar.png)
-
 - **Tema:** Aether, una paleta propia en salvia y verde azulado. Es la misma que usan Pliego y Forjia. El fondo es [wallhaven-xekydd](https://wallhaven.cc/w/xekydd); el instalador lo descarga desde su fuente original, no va en el repo. Neovim usa `aether.nvim` con la misma paleta (`neovim.lua` del tema). Los temas sin `neovim.lua` propio lo reciben de `config/omarchy/themed/neovim.lua.tpl`, que Omarchy rellena con los colores del tema al aplicarlo; sin eso LazyVim falla con `Failed to load plugins.theme`.
-- **Waybar:** a la derecha muestra barras de música (cava) y "ahora suena" (playerctl) cuando hay algo sonando, y se ocultan en silencio. Funciona con Apple Music, Spotify, YouTube y cualquier otro audio.
+- **Barra:** la de Omarchy (Quickshell, desde la versión "quattro"; antes era Waybar). A la derecha suma un ecualizador de música con cava (`config/omarchy/bar/modules/visualizer.qml`), que se oculta en silencio y funciona con Apple Music, Spotify, YouTube y cualquier otro audio.
+- **Panel de agentes:** copia del panel de Omarchy (`ing_michi.agents`) con pestañas cortas y logos propios. Además de Claude muestra GitHub Copilot, Faro (el LLM local) y Gemini (`agy`); cada uno tiene un script `omarchy-agent-usage-*` que un timer corre cada 5 minutos.
 - **Teclado:** toma el color del tema. Con música, pulsa con los graves. Si tienes un juego con el foco (Steam/Proton, gamescope o cualquier app que se declare juego), toma el color dominante de su ventana: la lee cada 3 s al 5 % de tamaño, solo en memoria, y no mira el resto de la pantalla. Si no, y lo que suena tiene carátula (una canción en Spotify o Apple Music, un video de YouTube), toma su color. Sin nada de eso (una llamada) pulsa con el color del tema, y en silencio vuelve a él. `Super + Shift + Ctrl + K` lo apaga todo.
 
 ## Qué resuelve
 
 | Problema en esta laptop | Arreglo | Archivo |
 |---|---|---|
-| Video con tirones y lag en multimedia: el panel cuelga de la Intel y todo se copiaba desde la NVIDIA | La decodificación de video pasa a la Intel (`LIBVA_DRIVER_NAME=iHD`) y el compositor sigue en NVIDIA. Mover la GPU primaria a la Intel rompe el login en este equipo | `config/uwsm/env` |
+| Video con tirones y lag en multimedia: el panel cuelga de la Intel y todo se copiaba desde la NVIDIA | La decodificación de video pasa a la Intel (`LIBVA_DRIVER_NAME=iHD`) y el compositor sigue en NVIDIA. Mover la GPU primaria a la Intel rompe el login en este equipo | `config/uwsm/env.d/99-omarchy-upgrade-env` |
 | Se colgaba al reanudar desde hibernación y había que forzar el apagado | El driver de NVIDIA ya no entra en el initramfs | `sistema/etc/mkinitcpio.conf.d/99-sin-nvidia-temprano.conf` |
 | La hibernación perdía la sesión (`failed to quiesce async: error -5`) | La VRAM se guarda en `/var/tmp` y se habilitan `nvidia-suspend`, `nvidia-hibernate` y `nvidia-resume` | `sistema/etc/modprobe.d/nvidia-sleep.conf`, `sistema/instalar-sistema.sh` |
 | La tecla de proyectar (Super+P) solo achicaba ventanas | Menú para duplicar, extender o usar solo la pantalla externa, como Win+P | `bin/pantalla-modo`, `config/hypr/bindings.lua` |
 | El monitor interno quedaba apagado al desconectar el externo | Se recupera solo al iniciar la sesión | `config/systemd/user/omarchy-recover-internal-monitor.service` |
 | Pedía dos contraseñas al arrancar | Autologin de SDDM más hyprlock al iniciar: se escribe una sola vez. El tema del login vive en ese mismo archivo, así que no hay que borrarlo | `sistema/etc/sddm.conf.d/autologin.conf`, `config/hypr/autostart.lua` |
 | Docker sin acceso a la GPU y con logs que crecían sin límite | Runtime de NVIDIA y logs rotados (5 × 10 MB) | `sistema/etc/docker/daemon.json` |
+| El Omarchy nuevo ya no evita el bloqueo con el cargador puesto | Enchufada no se bloquea ni apaga la pantalla; con batería vuelve el bloqueo normal | `bin/ac-stay-awake`, `config/systemd/user/ac-stay-awake.service` |
+| Actualizar el día que sale un kernel o un driver NVIDIA con fallas | Aviso de actualización como mucho una vez por semana, y solo cuando los paquetes delicados (kernel, NVIDIA, Hyprland, Omarchy…) llevan 3 días publicados. Clic en el aviso para actualizar | `bin/aviso-actualizaciones`, `config/systemd/user/actualizaciones-aviso.timer` |
 | El teclado RGB (una sola zona) no seguía el tema | Color del tema y modo reactivo a la música, con pocos cambios para no gastar el disco (asusd reescribe su configuración en cada cambio) | `bin/kbd-music`, `config/cava/keyboard.conf` |
 
 ## Qué incluye
 
 ```
 config/hypr/          Hyprland en Lua (atajos, monitores, apariencia, entrada) y hypridle/hyprlock/hyprsunset
-config/uwsm/env       variables de la sesión (GPU híbrida)
-config/waybar/        barra con música, indicadores y sus scripts
-config/cava/          barras de la Waybar y graves para el teclado
-config/omarchy/       tema Aether
+config/uwsm/env.d/    variables de la sesión (GPU híbrida)
+config/cava/          ecualizador de la barra y graves para el teclado
+config/omarchy/       tema Aether, barra (shell.json + ecualizador) y panel de agentes
 config/quickshell/    widgets del escritorio: pendientes, calendario y música
 config/faro/          LLM local: Modelfile, ajustes de SearXNG e ícono
-config/systemd/user/  teclado reactivo, recuperación del monitor interno y LLM local
-bin/                  kbd-music, kbd-music-toggle, pantalla-modo, llm-cargador, faro-abrir, escritorio
+config/systemd/user/  teclado reactivo, monitor interno, LLM local, cargador, avisos y uso de agentes
+bin/                  kbd-music, pantalla-modo, llm-cargador, faro-abrir, escritorio, ac-stay-awake,
+                      aviso-actualizaciones, omarchy-agent-usage-{copilot,faro,antigravity}
 sistema/etc/          arreglos de sistema (se copian aparte, con sudo)
 ```
 
@@ -65,11 +66,12 @@ omarchy pkg add cava playerctl jq asusctl imagemagick   # instala solo los que f
 ./install.sh --prueba             # muestra qué haría, sin tocar nada
 ./install.sh                      # enlaza la configuración y respalda lo que exista
 omarchy theme set Aether
-omarchy restart waybar
+omarchy restart shell
 sudo ./sistema/instalar-sistema.sh   # muestra cada cambio en /etc y pide confirmación
 ```
 
-- `install.sh` enlaza cada archivo en su lugar. Lo que ya exista se mueve a `~/.dotfiles-respaldo/<fecha>/`. Correrlo de nuevo no cambia nada.
+- `install.sh` enlaza cada archivo en su lugar. `shell.json` y el panel de agentes se copian, porque Omarchy reescribe `shell.json` y rompería el enlace. Lo que ya exista se mueve a `~/.dotfiles-respaldo/<fecha>/`. Correrlo de nuevo no cambia nada.
+- Pide la versión "quattro" de Omarchy o una más nueva: la configuración de Hyprland guarda solo los cambios propios y la barra es la de Omarchy.
 - `instalar-sistema.sh` muestra la diferencia de cada archivo de `/etc` antes de instalarlo, guarda una copia del anterior y, si cambió el initramfs, ofrece regenerarlo. El autologin queda con el usuario que corre el script. Reiniciar al terminar.
 
 ## Atajos propios
@@ -81,8 +83,6 @@ sudo ./sistema/instalar-sistema.sh   # muestra cada cambio en /etc y pide confir
 | `Super + Shift + Ctrl + K` | Prender o apagar el teclado reactivo a la música |
 | `Super + I` | Abrir Faro, el asistente local (ver abajo) |
 | `Super + D` | Pendientes, calendario y música encima de todo (Esc o clic fuera para cerrar) |
-
-En la Waybar, sobre "ahora suena": clic pausa o reanuda, clic derecho pasa a la siguiente y la rueda cambia de canción.
 
 ## Widgets del escritorio
 
@@ -119,6 +119,15 @@ ollama create faro -f config/faro/Modelfile
 - Si el adaptador no es `ADP0`, cambiarlo con `LLM_ADAPTADOR` (ver `ls /sys/class/power_supply`).
 - Las claves (`~/.local/share/faro/secreto.env` y la de SearXNG) se generan en cada instalación y no van al repo.
 - Para que busque en la web, en Open WebUI: *Ajustes de administración → Búsqueda web → SearXNG*, con `http://127.0.0.1:8888/search?q=<query>`.
+
+## Menú de arranque (Limine)
+
+No va al instalador porque lleva el UUID del disco. En `/etc/default/limine` se agregó esto, para que el menú tenga solo los kernels de CachyOS y sus snapshots, sin Windows ni la entrada «EFI fallback»:
+
+```bash
+FIND_BOOTLOADERS=no
+BOOT_ORDER="linux-cachyos, linux-cachyos-lts, *, *fallback, Snapshots"
+```
 
 ## Historia
 

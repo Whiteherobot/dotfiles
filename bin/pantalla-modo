@@ -2,8 +2,9 @@
 # Menú para elegir cómo usar una pantalla externa o un proyector (como Win+P en Windows).
 # Usa los toggles que trae Omarchy: omarchy-hyprland-monitor-internal-mirror e -internal.
 
-if pgrep -f "walker.*--dmenu" >/dev/null; then
-  walker --close >/dev/null 2>&1
+# Segunda pulsación del atajo con el menú abierto: cerrarlo.
+if pgrep -f "omarchy-menu-select Pantalla" >/dev/null; then
+  omarchy-shell shell hide omarchy.menu >/dev/null 2>&1
   exit 0
 fi
 
@@ -13,11 +14,11 @@ if ! omarchy-hw-external-monitors; then
   exit 1
 fi
 
-opcion=$(printf '%s\n' \
-  "󰍺  Duplicar (lo mismo en las dos)" \
-  "󰍹  Extender (la externa es otra pantalla)" \
-  "󰶐  Solo la pantalla externa" |
-  omarchy-launch-walker --dmenu --width 340 --minheight 1 --maxheight 300 -p "Pantalla…" 2>/dev/null)
+opcion=$(omarchy-menu-select "Pantalla…" \
+  $'󰍺\tDuplicar (lo mismo en las dos)' \
+  $'󰍹\tExtender (la externa es otra pantalla)' \
+  $'󰶐\tSolo la pantalla externa' \
+  -- --width 340 --maxheight 300 2>/dev/null)
 
 case "$opcion" in
   *Duplicar*)

@@ -12,23 +12,24 @@ jobs:
       - uses: actions/checkout@v5
       - run: sudo apt-get install -y shellcheck lua5.4
       - name: Scripts
-        run: shellcheck install.sh sistema/instalar-sistema.sh config/waybar/scripts/*.sh bin/kbd-music-toggle bin/pantalla-modo bin/faro-abrir bin/llm-cargador bin/escritorio
+        run: shellcheck install.sh sistema/instalar-sistema.sh bin/kbd-music-toggle bin/pantalla-modo bin/faro-abrir bin/llm-cargador bin/escritorio bin/ac-stay-awake bin/aviso-actualizaciones
       - uses: actions/setup-node@v4
         with:
           node-version: 24
       - name: Widgets del escritorio (pendientes y calendario)
         run: TZ=America/Guayaquil node --test config/quickshell/escritorio/test/*.test.ts
-      - name: Teclado reactivo (Python)
-        run: python3 -m py_compile bin/kbd-music
+      - name: Teclado reactivo y uso de agentes (Python)
+        run: for f in bin/kbd-music bin/omarchy-agent-usage-*; do python3 -m py_compile "$f"; done
       - name: Hyprland en Lua
         run: for f in config/hypr/*.lua; do luac5.4 -p "$f"; done
-      - name: JSON (Waybar y Docker)
-        run: jq empty config/waybar/config.jsonc sistema/etc/docker/daemon.json
+      - name: JSON (barra, panel de agentes y Docker)
+        run: jq empty config/omarchy/shell.json config/omarchy/plugins/ing_michi.agents/manifest.json sistema/etc/docker/daemon.json
       - name: Instalar en un HOME vacío, repetir y respaldar lo existente
         run: |
           export HOME="$(mktemp -d)"
-          mkdir -p "$HOME/.config/waybar" && echo viejo > "$HOME/.config/waybar/style.css"
+          mkdir -p "$HOME/.config/omarchy" && echo viejo > "$HOME/.config/omarchy/shell.json"
           total=$(./install.sh | grep -c "^enlazado")
           test "$(./install.sh | grep -c "ya enlazado")" = "$total"
-          test "$(cat "$HOME"/.dotfiles-respaldo/*/.config/waybar/style.css)" = viejo
+          test "$(cat "$HOME"/.dotfiles-respaldo/*/.config/omarchy/shell.json)" = viejo
+          test "$(./install.sh | grep -c "ya copiado")" = 2
           test -f "$HOME/.config/omarchy/themes/aether/colors.toml"

@@ -23,15 +23,13 @@ hay() { command -v "$1" >/dev/null 2>&1; }
 # origen en el repo : destino relativo a $HOME
 enlaces=()
 for f in "$repo"/config/hypr/*; do enlaces+=("config/hypr/${f##*/}:.config/hypr/${f##*/}"); done
-for f in "$repo"/config/waybar/scripts/*; do enlaces+=("config/waybar/scripts/${f##*/}:.config/waybar/scripts/${f##*/}"); done
 for f in "$repo"/config/cava/*; do enlaces+=("config/cava/${f##*/}:.config/cava/${f##*/}"); done
 for f in "$repo"/config/systemd/user/*; do enlaces+=("config/systemd/user/${f##*/}:.config/systemd/user/${f##*/}"); done
 for f in "$repo"/config/omarchy/themed/*; do enlaces+=("config/omarchy/themed/${f##*/}:.config/omarchy/themed/${f##*/}"); done
 for f in "$repo"/bin/*; do enlaces+=("bin/${f##*/}:.local/bin/${f##*/}"); done
 enlaces+=(
-  "config/waybar/config.jsonc:.config/waybar/config.jsonc"
-  "config/waybar/style.css:.config/waybar/style.css"
-  "config/uwsm/env:.config/uwsm/env"
+  "config/uwsm/env.d/99-omarchy-upgrade-env:.config/uwsm/env.d/99-omarchy-upgrade-env"
+  "config/omarchy/bar/modules/visualizer.qml:.config/omarchy/bar/modules/visualizer.qml"
   "config/starship.toml:.config/starship.toml"
   "config/quickshell/escritorio:.config/quickshell/escritorio"
 )
@@ -71,6 +69,32 @@ else
   echo "tema         $(corto "$tema")"
 fi
 
+# La barra (shell.json) y el panel de agentes se copian: Omarchy reescribe shell.json con
+# "omarchy bar …" y un enlace se perdería. Lo que ya exista se respalda igual que arriba.
+copias=(
+  "config/omarchy/shell.json:.config/omarchy/shell.json"
+  "config/omarchy/plugins/ing_michi.agents:.config/omarchy/plugins/ing_michi.agents"
+)
+for par in "${copias[@]}"; do
+  origen="$repo/${par%%:*}"
+  destino="$HOME/${par#*:}"
+  if diff -rq "$origen" "$destino" >/dev/null 2>&1; then
+    echo "ya copiado   $(corto "$destino")"
+    continue
+  fi
+  if $prueba; then
+    echo "copiaría     $(corto "$destino")"
+    continue
+  fi
+  if [[ -e $destino || -L $destino ]]; then
+    mkdir -p "$respaldo/$(dirname "${par#*:}")"
+    mv "$destino" "$respaldo/${par#*:}"
+  fi
+  mkdir -p "$(dirname "$destino")"
+  cp -a "$origen" "$destino"
+  echo "copiado      $(corto "$destino")"
+done
+
 # Apple Music como app web, igual que las que trae Omarchy (WhatsApp, Discord…)
 if ! $prueba && hay omarchy && [[ ! -e "$HOME/.local/share/applications/Apple Music.desktop" ]]; then
   omarchy webapp install "Apple Music" "https://music.apple.com/" \
@@ -86,6 +110,11 @@ if ! $prueba && hay systemctl; then
   else
     echo "aviso: falta asusctl o cava; el teclado reactivo queda sin activar (omarchy pkg add cava)"
   fi
+  # Enchufado = pantalla despierta; aviso de actualizaciones cada 7 días como mínimo
+  systemctl --user enable ac-stay-awake.service actualizaciones-aviso.timer >/dev/null 2>&1 || true
+  # Uso de Copilot y Gemini (agy) en el panel de agentes, solo si están instalados
+  hay copilot && systemctl --user enable --now omarchy-agent-usage-copilot.timer >/dev/null 2>&1 || true
+  hay agy && systemctl --user enable --now omarchy-agent-usage-antigravity.timer >/dev/null 2>&1 || true
 fi
 
 # LLM local (opcional): Ollama + Open WebUI ("Faro") + SearXNG; se prende con el cargador.
@@ -102,6 +131,7 @@ if ! $prueba && hay ollama && hay docker && hay systemctl; then
     sed "s/se-genera-al-instalar/$(clave)/" "$repo/config/faro/searxng/settings.yml" > "$faro_datos/searxng/settings.yml"
   fi
   systemctl --user enable llm-cargador.service >/dev/null 2>&1 && echo "servicio     llm-cargador (LLM local con el cargador)"
+  systemctl --user enable --now omarchy-agent-usage-faro.timer >/dev/null 2>&1 || true
   [[ -d $HOME/.ollama/models/manifests/registry.ollama.ai/library/faro ]] ||
     echo "aviso: falta el modelo: ollama pull qwen3.5:9b && ollama create faro -f $repo/config/faro/Modelfile"
 elif ! $prueba; then
@@ -114,7 +144,7 @@ if ! $prueba; then
 
 Listo. Para terminar:
   omarchy theme set Aether            # tema y colores
-  omarchy restart waybar              # barra con música
+  omarchy restart shell               # barra con música y panel de agentes
   sudo ./sistema/instalar-sistema.sh  # arreglos de la laptop (NVIDIA, hibernación, login)
 EOF
 fi

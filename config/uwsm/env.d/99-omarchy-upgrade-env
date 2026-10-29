@@ -1,0 +1,24 @@
+# Preserved custom ~/.config/uwsm/env content during Omarchy quattro upgrade.
+# Exact legacy Omarchy-managed setup lines were replaced with no-op markers where safe.
+# Changes require a restart to take effect.
+
+# Ensure Omarchy bins are in the path
+: # omarchy-upgrade omitted legacy Omarchy OMARCHY_PATH
+: # omarchy-upgrade omitted legacy Omarchy PATH setup
+
+# Set default terminal and editor
+: # omarchy-upgrade omitted legacy Omarchy uwsm/default source
+
+# Activate mise if present on the system
+: # omarchy-upgrade omitted legacy Omarchy mise activation
+
+# NVIDIA
+# Cambio mínimo y seguro: solo el DECODE de video pasa a la iGPU Intel (iHD),
+# para bajar el tirón de multimedia. El compositor SIGUE en NVIDIA (esto es lo que
+# arranca; NO tocar, mover la primaria a Intel rompe el login en este equipo).
+export LIBVA_DRIVER_NAME=iHD
+export GBM_BACKEND=nvidia-drm
+export __GLX_VENDOR_LIBRARY_NAME=nvidia
+export NVD_BACKEND=direct
+export MOZ_DISABLE_RDD_SANDBOX=1
+export CUDA_DISABLE_PERF_BOOST=1

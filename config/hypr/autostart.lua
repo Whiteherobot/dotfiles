@@ -1,8 +1,8 @@
 -- Extra autostart processes.
--- hl.on("hyprland.start", function()
---   hl.exec_cmd("uwsm-app -- my-service")
--- end)
-o.exec_on_start("hyprlock")
+-- o.launch_on_start("my-service")
+
+-- [Michi] personalizaciones migradas desde Omarchy 3.8.5
+o.exec_on_start("omarchy-system-lock")
 
 -- Widgets del escritorio: pendientes, calendario y música.
 o.exec_on_start("uwsm-app -- quickshell -c escritorio")
