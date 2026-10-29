@@ -1,0 +1,111 @@
+#!/usr/bin/python3
+# Print the Faro (local Ollama model) usage record as JSON for the Omarchy agents panel.
+#
+# Same record contract as /usr/share/omarchy/bin/omarchy-agent-usage-claude.
+# Ollama keeps no token history, so every Faro caller (faro-mcp, the session handoff and
+# baul-mcp) appends one line per call to ~/.local/state/faro/uso.jsonl:
+# {"fecha", "origen", "modelo", "entrada", "salida"}. Faro is local and free: no limits.
+#
+# Run with --write to drop the record into ~/.local/state/omarchy/agents/usage/.
+
+import datetime as dt
+import json
+import os
+import sys
+import urllib.request
+from pathlib import Path
+from typing import Any
+
+USO = Path.home() / ".local/state/faro/uso.jsonl"
+USAGE_DIR = Path(os.environ.get("XDG_STATE_HOME", Path.home() / ".local/state")) / "omarchy/agents/usage"
+
+
+def status() -> str:
+  try:
+    with urllib.request.urlopen("http://127.0.0.1:11434/api/version", timeout=2):
+      return ""
+  except OSError:
+    return "Paused: Ollama is off (laptop on battery)."
+
+
+def scan() -> dict[str, Any]:
+  today = dt.date.today().isoformat()
+  recent = [(dt.date.today() - dt.timedelta(days=offset)).isoformat() for offset in range(6, -1, -1)]
+  daily = {day: 0 for day in recent}
+  model_usage: dict[str, dict[str, int]] = {}
+  today_by_model: dict[str, int] = {}
+  active_dates: set[str] = set()
+  calls = today_calls = 0
+  try:
+    lines = USO.read_text(errors="replace").splitlines()
+  except OSError:
+    lines = []
+
+  for line in lines:
+    try:
+      entry = json.loads(line)
+    except json.JSONDecodeError:
+      continue
+    day = str(entry.get("fecha", ""))[:10]
+    if not day:
+      continue
+    model = str(entry.get("modelo") or "faro")
+    input_tokens, output = int(entry.get("entrada") or 0), int(entry.get("salida") or 0)
+    bucket = model_usage.setdefault(model, {
+      "inputTokens": 0,
+      "outputTokens": 0,
+      "cacheReadInputTokens": 0,
+      "cacheCreationInputTokens": 0,
+    })
+    bucket["inputTokens"] += input_tokens
+    bucket["outputTokens"] += output
+    calls += 1
+    active_dates.add(day)
+    if day in daily:
+      daily[day] += input_tokens + output
+    if day == today:
+      today_calls += 1
+      today_by_model[model] = today_by_model.get(model, 0) + input_tokens + output
+
+  return {
+    "hasLocalStats": calls > 0,
+    "todayPrompts": today_calls,
+    "todaySessions": today_calls,
+    "todayTotalTokens": sum(today_by_model.values()),
+    "todayTokensByModel": today_by_model,
+    "totalPrompts": calls,
+    "totalSessions": calls,
+    "activeDays": len(active_dates),
+    "activeDates": sorted(active_dates),
+    "recentDays": [{"date": day, "messageCount": daily[day]} for day in recent],
+    "modelUsage": model_usage,
+  }
+
+
+def main() -> int:
+  record = {
+    "schemaVersion": 1,
+    "id": "faro",
+    "name": "Faro",
+    "updatedAt": dt.datetime.now(dt.timezone.utc).isoformat(),
+    "ready": True,
+    **scan(),
+    "limits": [],
+    "tierLabel": "Local",
+    "usageStatusText": status(),
+    "authHelpText": "",
+  }
+  text = json.dumps(record, indent=2, sort_keys=True)
+
+  if "--write" in sys.argv:
+    USAGE_DIR.mkdir(parents=True, exist_ok=True)
+    tmp = USAGE_DIR / ".faro.json.tmp"
+    tmp.write_text(text + "\n")
+    tmp.replace(USAGE_DIR / "faro.json")
+  else:
+    print(text)
+  return 0
+
+
+if __name__ == "__main__":
+  sys.exit(main())

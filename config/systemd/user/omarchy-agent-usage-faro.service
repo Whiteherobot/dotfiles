@@ -1,0 +1,6 @@
+[Unit]
+Description=Write Faro (local model) usage record for the Omarchy agents panel
+
+[Service]
+Type=oneshot
+ExecStart=%h/.local/bin/omarchy-agent-usage-faro --write

@@ -1,0 +1,180 @@
+#!/usr/bin/python3
+# Print the Antigravity CLI (agy, Gemini) usage record as JSON for the Omarchy agents panel.
+#
+# Same record contract as /usr/share/omarchy/bin/omarchy-agent-usage-claude.
+# Local stats come from ~/.gemini/antigravity-cli: conversation_summaries.db gives each
+# conversation's last activity, and conversations/<id>.db keeps one protobuf blob per model
+# call in gen_metadata whose field 1.4 is the usage (1 model id, 2 input, 3 output, 9 thinking).
+# Google exposes no quota endpoint for agy, so the record has no limits.
+#
+# Run with --write to drop the record into ~/.local/state/omarchy/agents/usage/.
+
+import datetime as dt
+import json
+import os
+import sqlite3
+import sys
+from pathlib import Path
+from typing import Any
+
+AGY_HOME = Path.home() / ".gemini/antigravity-cli"
+USAGE_DIR = Path(os.environ.get("XDG_STATE_HOME", Path.home() / ".local/state")) / "omarchy/agents/usage"
+
+# Model ids seen in gen_metadata, as the hyphenated names the panel prettifies
+# (gemini-3.8-flash-high -> "Gemini 3.8 Flash High"); unknown ones show as "model-<id>".
+MODELS = {
+  1318: "gemini-3.8-flash-high",
+  1319: "gemini-3.8-flash-medium",
+  1320: "gemini-3.8-flash-low",
+}
+
+
+def fields(buf: bytes) -> list[tuple[int, int, Any]]:
+  """Top-level fields of a protobuf message as (number, wire type, value)."""
+  out, i = [], 0
+
+  def varint() -> int:
+    nonlocal i
+    value = shift = 0
+    while True:
+      byte = buf[i]
+      i += 1
+      value |= (byte & 0x7F) << shift
+      shift += 7
+      if byte < 0x80:
+        return value
+
+  while i < len(buf):
+    key = varint()
+    number, wire = key >> 3, key & 7
+    if wire == 0:
+      out.append((number, 0, varint()))
+    elif wire == 2:
+      length = varint()
+      out.append((number, 2, buf[i:i + length]))
+      i += length
+    elif wire == 1:
+      i += 8
+    elif wire == 5:
+      i += 4
+    else:
+      raise ValueError("unsupported wire type")
+  return out
+
+
+def usages(conversation: Path) -> list[dict[str, int]]:
+  try:
+    db = sqlite3.connect(f"file:{conversation}?mode=ro", uri=True)
+    rows = db.execute("select data from gen_metadata").fetchall()
+    db.close()
+  except sqlite3.Error:
+    return []
+  found = []
+  for (data,) in rows:
+    try:
+      for number, wire, value in fields(data):
+        if number != 1 or wire != 2:
+          continue
+        for inner, inner_wire, usage in fields(value):
+          if inner == 4 and inner_wire == 2:
+            found.append({n: v for n, w, v in fields(usage) if w == 0})
+    except (ValueError, IndexError):
+      continue
+  return found
+
+
+def conversation_days() -> dict[str, str]:
+  try:
+    db = sqlite3.connect(f"file:{AGY_HOME / 'conversation_summaries.db'}?mode=ro", uri=True)
+    rows = db.execute("select conversation_id, last_modified_time from conversation_summaries").fetchall()
+    db.close()
+  except sqlite3.Error:
+    return {}
+  days = {}
+  for conversation_id, modified in rows:
+    try:
+      moment = dt.datetime.fromisoformat(str(modified)[:26].replace(" ", "T") + "+00:00")
+    except ValueError:
+      continue
+    days[conversation_id] = moment.astimezone().strftime("%Y-%m-%d")
+  return days
+
+
+def scan() -> dict[str, Any]:
+  today = dt.date.today().isoformat()
+  recent = [(dt.date.today() - dt.timedelta(days=offset)).isoformat() for offset in range(6, -1, -1)]
+  daily = {day: 0 for day in recent}
+  model_usage: dict[str, dict[str, int]] = {}
+  today_by_model: dict[str, int] = {}
+  active_dates: set[str] = set()
+  sessions = today_sessions = calls = today_calls = 0
+
+  days = conversation_days()
+  for conversation in (AGY_HOME / "conversations").glob("*.db"):
+    day = days.get(conversation.stem) or dt.datetime.fromtimestamp(conversation.stat().st_mtime).strftime("%Y-%m-%d")
+    records = usages(conversation)
+    if not records:
+      continue
+    sessions += 1
+    today_sessions += day == today
+    active_dates.add(day)
+    for usage in records:
+      model = MODELS.get(usage.get(1, 0), f"model-{usage.get(1, 0)}")
+      input_tokens, output = usage.get(2, 0), usage.get(3, 0)
+      bucket = model_usage.setdefault(model, {
+        "inputTokens": 0,
+        "outputTokens": 0,
+        "cacheReadInputTokens": 0,
+        "cacheCreationInputTokens": 0,
+      })
+      bucket["inputTokens"] += input_tokens
+      bucket["outputTokens"] += output
+      calls += 1
+      if day in daily:
+        daily[day] += input_tokens + output
+      if day == today:
+        today_calls += 1
+        today_by_model[model] = today_by_model.get(model, 0) + input_tokens + output
+
+  return {
+    "hasLocalStats": sessions > 0,
+    "todayPrompts": today_calls,
+    "todaySessions": today_sessions,
+    "todayTotalTokens": sum(today_by_model.values()),
+    "todayTokensByModel": today_by_model,
+    "totalPrompts": calls,
+    "totalSessions": sessions,
+    "activeDays": len(active_dates),
+    "activeDates": sorted(active_dates),
+    "recentDays": [{"date": day, "messageCount": daily[day]} for day in recent],
+    "modelUsage": model_usage,
+  }
+
+
+def main() -> int:
+  record = {
+    "schemaVersion": 1,
+    "id": "gemini",
+    "name": "Gemini",
+    "updatedAt": dt.datetime.now(dt.timezone.utc).isoformat(),
+    "ready": True,
+    **scan(),
+    "limits": [],
+    "tierLabel": "Plus",
+    "usageStatusText": "",
+    "authHelpText": "Run `agy` to sign in again.",
+  }
+  text = json.dumps(record, indent=2, sort_keys=True)
+
+  if "--write" in sys.argv:
+    USAGE_DIR.mkdir(parents=True, exist_ok=True)
+    tmp = USAGE_DIR / ".gemini.json.tmp"
+    tmp.write_text(text + "\n")
+    tmp.replace(USAGE_DIR / "gemini.json")
+  else:
+    print(text)
+  return 0
+
+
+if __name__ == "__main__":
+  sys.exit(main())
