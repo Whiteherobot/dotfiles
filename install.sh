@@ -113,8 +113,8 @@ if ! $prueba && hay systemctl; then
   # Enchufado = pantalla despierta; aviso de actualizaciones cada 7 días como mínimo
   systemctl --user enable ac-stay-awake.service actualizaciones-aviso.timer >/dev/null 2>&1 || true
   # Uso de Copilot y Gemini (agy) en el panel de agentes, solo si están instalados
-  hay copilot && systemctl --user enable --now omarchy-agent-usage-copilot.timer >/dev/null 2>&1 || true
-  hay agy && systemctl --user enable --now omarchy-agent-usage-antigravity.timer >/dev/null 2>&1 || true
+  if hay copilot; then systemctl --user enable --now omarchy-agent-usage-copilot.timer >/dev/null 2>&1 || true; fi
+  if hay agy; then systemctl --user enable --now omarchy-agent-usage-antigravity.timer >/dev/null 2>&1 || true; fi
 fi
 
 # LLM local (opcional): Ollama + Open WebUI ("Faro") + SearXNG; se prende con el cargador.
