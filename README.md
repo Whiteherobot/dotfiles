@@ -20,6 +20,8 @@ Esta laptop recibió muchas críticas desde que salió. Al pasarla a Linux, casi
 
 ![Paleta del tema Aether](docs/img/paleta.png)
 
+![Barra de Omarchy con música sonando: ecualizador de cava, canción y controles](docs/img/barra.png)
+
 - **Tema:** Aether, una paleta propia en salvia y verde azulado. Es la misma que usan Pliego y Forjia. El fondo es [wallhaven-xekydd](https://wallhaven.cc/w/xekydd); el instalador lo descarga desde su fuente original, no va en el repo. Neovim usa `aether.nvim` con la misma paleta (`neovim.lua` del tema). Los temas sin `neovim.lua` propio lo reciben de `config/omarchy/themed/neovim.lua.tpl`, que Omarchy rellena con los colores del tema al aplicarlo; sin eso LazyVim falla con `Failed to load plugins.theme`.
 - **Barra:** la de Omarchy (Quickshell, desde la versión "quattro"; antes era Waybar). A la derecha suma un ecualizador de música con cava (`config/omarchy/bar/modules/visualizer.qml`), que se oculta en silencio y funciona con Apple Music, Spotify, YouTube y cualquier otro audio.
 - **Panel de agentes:** copia del panel de Omarchy (`ing_michi.agents`) con pestañas cortas y logos propios. Además de Claude muestra GitHub Copilot, Faro (el LLM local) y Gemini (`agy`); cada uno tiene un script `omarchy-agent-usage-*` que un timer corre cada 5 minutos.
