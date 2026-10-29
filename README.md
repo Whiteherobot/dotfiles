@@ -10,9 +10,9 @@ Esta laptop recibió muchas críticas desde que salió. Al pasarla a Linux, casi
 
 ## Cómo se ve
 
-![Escritorio con el fondo y la barra](docs/img/1-escritorio.jpg)
+![Escritorio con la barra de Omarchy y los widgets de pendientes y calendario (tareas de ejemplo)](docs/img/1-escritorio.jpg)
 
-| Lanzador de apps (`SUPER + SPACE`) | Menú de Omarchy (`SUPER + ALT + SPACE`) |
+| Lanzador de apps (`SUPER + ALT + SPACE`) | Menú de Omarchy (`SUPER + SPACE`) |
 | --- | --- |
 | ![Lanzador de apps](docs/img/2-lanzador.jpg) | ![Menú de Omarchy](docs/img/4-menu.jpg) |
 
