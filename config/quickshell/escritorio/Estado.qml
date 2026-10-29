@@ -1,5 +1,5 @@
 // Fuente de datos de los widgets: corre `escritorio estado` y expone el JSON.
-// Se refresca cuando cambia el archivo de pendientes y, por las dudas (cambio de día), cada 2 min.
+// Se refresca cuando cambian pendientes o las sugerencias de Faro y, por las dudas (cambio de día), cada 2 min.
 import QtQuick
 import Quickshell
 import Quickshell.Io
@@ -42,6 +42,12 @@ Item {
         accion.running = true;
     }
 
+    function decidirIdea(idea, si) {
+        if (accion.running) return;
+        accion.command = [cli, "idea", idea.id, si ? "si" : "no"];
+        accion.running = true;
+    }
+
     Process {
         id: accion
         onExited: root.refrescar()
@@ -70,6 +76,12 @@ Item {
 
     FileView {
         path: root.datos ? root.datos.archivo : ""
+        watchChanges: true
+        onFileChanged: root.refrescar()
+    }
+
+    FileView {
+        path: root.datos ? root.datos.archivoIdeas : ""
         watchChanges: true
         onFileChanged: root.refrescar()
     }

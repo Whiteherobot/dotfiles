@@ -4,6 +4,7 @@
 //   escritorio tarea <indice> <pendiente|en-curso|hecha> [--texto "texto esperado"]
 //   escritorio tarea lista
 //   escritorio tarea detalle <indice>          → avance de la nota vinculada (null si no tiene)
+//   escritorio idea <id> <si|no>               → acepta o rechaza una sugerencia de Faro
 //   escritorio calendario [--desde F] [--hasta F] [--forzar] → eventos por día (iCal)
 import { mkdirSync } from 'node:fs';
 import { dirname } from 'node:path';
@@ -12,6 +13,7 @@ import { consultarCalendario, rangoPorDefecto } from './calendario.ts';
 import { config } from './config.ts';
 import { hoyLocal } from './fechas.ts';
 import { detalleDeNota } from './notas.ts';
+import { decidirIdea, leerIdeas } from './ideas.ts';
 import { guardarEstadoTarea, guardarNuevaTarea, leerTareas, type EstadoTarea } from './tareas.ts';
 
 const imprimir = (x: unknown) => console.log(JSON.stringify(x, null, 2));
@@ -35,6 +37,8 @@ switch (comando) {
     imprimir({
       hoy: hoyLocal(),
       archivo: config.pendientes,
+      archivoIdeas: config.ideas,
+      ideas: leerIdeas(config.ideas),
       // Sin terminar; primero lo que está en curso.
       tareas: todas
         .filter((t) => t.estado !== 'hecha')
@@ -42,6 +46,12 @@ switch (comando) {
       // Todas, en el orden del archivo, para el tablero kanban.
       todasLasTareas: todas,
     });
+    break;
+  }
+  case 'idea': {
+    const [id, respuesta] = args;
+    if (!id || !['si', 'no'].includes(respuesta)) throw new Error('Uso: escritorio idea <id> <si|no>');
+    imprimir(decidirIdea(id, respuesta === 'si'));
     break;
   }
   case 'tarea': {
@@ -66,6 +76,6 @@ switch (comando) {
     break;
   }
   default:
-    console.error('Uso: escritorio estado | tarea … | calendario [--desde F] [--hasta F] [--forzar]');
+    console.error('Uso: escritorio estado | tarea … | idea <id> <si|no> | calendario [--desde F] [--hasta F] [--forzar]');
     process.exit(1);
 }

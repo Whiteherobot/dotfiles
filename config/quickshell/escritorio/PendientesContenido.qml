@@ -1,5 +1,5 @@
-// Tarjeta de pendientes: el checklist de Pendientes.md (ver cli/config.ts). Clic en el círculo = hecha,
-// clic en el texto = alterna "en curso", clic en el encabezado = tablero kanban.
+// Tarjeta de pendientes y sugerencias de Faro: el checklist de Pendientes.md (ver cli/config.ts).
+// Clic en el círculo = hecha, clic en el texto = alterna "en curso", clic en el encabezado = tablero kanban.
 import QtQuick
 import QtQuick.Layouts
 
@@ -10,6 +10,7 @@ Vidrio {
     readonly property var datos: estado.datos
     readonly property int maxTareas: 6
     readonly property var tareas: datos && datos.tareas ? datos.tareas : []
+    readonly property var ideas: datos && datos.ideas ? datos.ideas : []
 
     implicitWidth: 346
     implicitHeight: contenido.implicitHeight + 36
@@ -148,6 +149,84 @@ Vidrio {
                 text: "y " + (tarjeta.tareas.length - tarjeta.maxTareas) + " más en el tablero"
                 color: tarjeta.muyTenue
                 font { family: tarjeta.fuente; pixelSize: 11 }
+            }
+
+            ColumnLayout {
+                visible: tarjeta.ideas.length > 0
+                Layout.fillWidth: true
+                spacing: 9
+
+                Etiqueta { text: "FARO SUGIERE · " + tarjeta.ideas.length }
+
+                Repeater {
+                    model: tarjeta.ideas
+                    Fila {
+                        id: filaIdea
+                        required property var modelData
+
+                        ColumnLayout {
+                            Layout.fillWidth: true
+                            spacing: 2
+
+                            Text {
+                                Layout.fillWidth: true
+                                elide: Text.ElideRight
+                                text: filaIdea.modelData.etiqueta + " · " + filaIdea.modelData.proyecto
+                                color: tarjeta.muyTenue
+                                font { family: tarjeta.fuente; pixelSize: 10 }
+                            }
+                            Text {
+                                id: ideaTexto
+                                Layout.fillWidth: true
+                                wrapMode: Text.Wrap
+                                maximumLineCount: 3
+                                elide: Text.ElideRight
+                                text: filaIdea.modelData.texto
+                                color: tarjeta.texto
+                                font { family: tarjeta.fuente; pixelSize: 12 }
+                            }
+                        }
+
+                        Rectangle {
+                            implicitWidth: 22
+                            implicitHeight: 22
+                            radius: 11
+                            color: areaSi.containsMouse ? tarjeta.bien : Qt.rgba(1, 1, 1, 0.10)
+                            Text {
+                                anchors.centerIn: parent
+                                text: "✓"
+                                color: areaSi.containsMouse ? Tema.fondo : tarjeta.bien
+                                font { family: tarjeta.fuente; pixelSize: 13; weight: Font.Bold }
+                            }
+                            MouseArea {
+                                id: areaSi
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: tarjeta.estado.decidirIdea(filaIdea.modelData, true)
+                            }
+                        }
+                        Rectangle {
+                            implicitWidth: 22
+                            implicitHeight: 22
+                            radius: 11
+                            color: areaNo.containsMouse ? tarjeta.tenue : Qt.rgba(1, 1, 1, 0.10)
+                            Text {
+                                anchors.centerIn: parent
+                                text: "✗"
+                                color: areaNo.containsMouse ? Tema.fondo : tarjeta.tenue
+                                font { family: tarjeta.fuente; pixelSize: 13; weight: Font.Bold }
+                            }
+                            MouseArea {
+                                id: areaNo
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: tarjeta.estado.decidirIdea(filaIdea.modelData, false)
+                            }
+                        }
+                    }
+                }
             }
         }
     }
