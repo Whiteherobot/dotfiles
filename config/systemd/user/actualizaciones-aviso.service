@@ -1,0 +1,7 @@
+[Unit]
+Description=Aviso de actualizaciones (clic para actualizar)
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=%h/.local/bin/aviso-actualizaciones

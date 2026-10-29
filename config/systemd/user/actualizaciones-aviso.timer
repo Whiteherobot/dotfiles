@@ -1,0 +1,11 @@
+[Unit]
+Description=Revisar actualizaciones una vez al día (avisa cada 7 días como mínimo)
+
+[Timer]
+OnCalendar=*-*-* 11:00
+OnBootSec=15min
+Persistent=true
+RandomizedDelaySec=20min
+
+[Install]
+WantedBy=timers.target

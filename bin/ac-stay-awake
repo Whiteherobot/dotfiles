@@ -1,0 +1,24 @@
+#!/bin/bash
+# Reemplaza el "skip while on AC" del hypridle.conf viejo (Quattro movió el idle a omarchy-shell,
+# que no mira la corriente): enchufado => stay-awake, en batería => idle/lock normal.
+
+on_ac() {
+  local f
+  for f in /sys/class/power_supply/*/online; do
+    [[ $(<"$f") == 1 ]] && return 0
+  done
+  return 1
+}
+
+sync_state() {
+  if on_ac; then
+    omarchy-toggle-idle stay-awake
+  else
+    omarchy-toggle-idle allow-idle
+  fi >/dev/null
+}
+
+sync_state
+udevadm monitor --udev --subsystem-match=power_supply | while read -r line; do
+  [[ $line == *change* ]] && sync_state
+done

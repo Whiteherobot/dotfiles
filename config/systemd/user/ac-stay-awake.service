@@ -1,0 +1,11 @@
+[Unit]
+Description=Mantener pantalla despierta mientras está enchufado
+After=graphical-session.target
+PartOf=graphical-session.target
+
+[Service]
+ExecStart=%h/.local/bin/ac-stay-awake
+Restart=on-failure
+
+[Install]
+WantedBy=graphical-session.target

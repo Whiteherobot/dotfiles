@@ -1,0 +1,58 @@
+#!/bin/bash
+# Aviso periódico de actualizaciones: notificación que al hacer clic actualiza el sistema.
+# Lo corre a diario actualizaciones-aviso.timer, pero solo avisa cuando:
+#   1. pasaron al menos DIAS_ENTRE días desde la última actualización completa, y
+#   2. ningún paquete delicado (kernel, NVIDIA, Hyprland, Omarchy…) salió hace menos de
+#      DIAS_MADURAR días (así esperamos a que salgan los arreglos de las versiones con bugs).
+# --forzar avisa ya, sin mirar las reglas (para probar).
+
+DIAS_ENTRE=7
+DIAS_MADURAR=3
+DELICADOS='^(linux-cachyos.*|linux-lts.*|linux|nvidia.*|lib32-nvidia.*|mesa|lib32-mesa|hyprland|aquamarine|omarchy|quickshell.*|systemd|glibc|networkmanager|wpa_supplicant|pipewire|wireplumber|asusctl|limine)$'
+
+forzar=0
+[[ ${1:-} == --forzar ]] && forzar=1
+
+ahora=$(date +%s)
+
+if (( !forzar )); then
+  ultima=$(grep "starting full system upgrade" /var/log/pacman.log | tail -1 | grep -oP '^\[\K[^\]]+')
+  if [[ -n $ultima ]]; then
+    dias=$(( (ahora - $(date -d "$ultima" +%s)) / 86400 ))
+    (( dias < DIAS_ENTRE )) && exit 0
+  fi
+fi
+
+# checkupdates sincroniza una copia aparte de la base, así que no toca la del sistema.
+export CHECKUPDATES_DB="${TMPDIR:-/tmp}/checkup-db-${UID}/"
+mapfile -t repo < <(checkupdates --nocolor 2>/dev/null | awk '{print $1}')
+mapfile -t aur < <(yay -Qua 2>/dev/null | awk '{print $1}')
+total=$(( ${#repo[@]} + ${#aur[@]} ))
+(( total == 0 )) && exit 0
+
+# Paquetes delicados recién publicados: esperar a que maduren.
+frescos=()
+for p in "${repo[@]}"; do
+  [[ $p =~ $DELICADOS ]] || continue
+  fecha=$(LC_ALL=C pacman -Si --dbpath "$CHECKUPDATES_DB" "$p" 2>/dev/null | awk -F': ' '/^Build Date/ {print $2; exit}')
+  [[ -z $fecha ]] && continue
+  edad=$(( (ahora - $(date -d "$fecha" +%s)) / 86400 ))
+  (( edad < DIAS_MADURAR )) && frescos+=("$p")
+done
+
+if (( ${#frescos[@]} > 0 && !forzar )); then
+  echo "Esperando a que maduren: ${frescos[*]}"
+  exit 0
+fi
+
+detalle="${#repo[@]} del sistema"
+(( ${#aur[@]} > 0 )) && detalle+=", ${#aur[@]} de AUR"
+importantes=$(printf '%s\n' "${repo[@]}" | grep -E "$DELICADOS" | head -4 | paste -sd ', ')
+[[ -n $importantes ]] && detalle+=" (incluye $importantes)"
+
+# critical: el shell de Omarchy deja las normales 8 s como máximo (tope 30 s); las críticas
+# quedan en pantalla hasta hacer clic o cerrarlas.
+omarchy-notification-send -g 󰚰 -u critical \
+  "Hay $total actualizaciones listas" \
+  "$detalle. Clic para actualizar (se crea un snapshot antes)." \
+  --exec omarchy-launch-floating-terminal-with-presentation omarchy-update
