@@ -123,6 +123,15 @@ ollama create faro -f config/faro/Modelfile
 - Las claves (`~/.local/share/faro/secreto.env` y la de SearXNG) se generan en cada instalación y no van al repo.
 - Para que busque en la web, en Open WebUI: *Ajustes de administración → Búsqueda web → SearXNG*, con `http://127.0.0.1:8888/search?q=<query>`.
 
+## Pantalla de arranque (Plymouth)
+
+Logo de Caja Retro: el sello 道 sobre el gris del tema, con textos crema. Pide sudo porque reescribe el tema de arranque y regenera el initramfs; también cambia el login (SDDM):
+
+```bash
+omarchy plymouth set '#282828' '#d4be98' ~/.config/omarchy/branding/caja-retro/hanko-boot.png
+omarchy plymouth set --refresh-default   # volver al de Omarchy
+```
+
 ## Menú de arranque (Limine)
 
 No va al instalador porque lleva el UUID del disco. En `/etc/default/limine` se agregó esto, para que el menú tenga solo los kernels de CachyOS y sus snapshots, sin Windows ni la entrada «EFI fallback»:
