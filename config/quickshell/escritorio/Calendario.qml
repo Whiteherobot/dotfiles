@@ -488,7 +488,7 @@ PanelWindow {
                             const d = new Date(vista.datos.actualizado);
                             return (vista.datos.sinConexion ? "Sin conexión · copia de las " : "Actualizado a las ") + String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0");
                         }
-                        color: vista.datos && vista.datos.sinConexion ? "#ffd27a" : detalle.muyTenue
+                        color: vista.datos && vista.datos.sinConexion ? Tema.amarillo : detalle.muyTenue
                         font { family: detalle.fuente; pixelSize: 10 }
                     }
                 }

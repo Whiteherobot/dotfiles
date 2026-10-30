@@ -246,7 +246,7 @@ Vidrio {
                 Layout.fillWidth: true
                 wrapMode: Text.Wrap
                 text: !tarjeta.datos ? "" : tarjeta.datos.errores.length ? "No pude leer: " + tarjeta.datos.errores.join(" · ") : "Sin conexión: mostrando la última copia"
-                color: "#ffd27a"
+                color: Tema.amarillo
                 font { family: tarjeta.fuente; pixelSize: 10 }
             }
         }

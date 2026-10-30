@@ -18,7 +18,7 @@ Item {
     signal pidioCalendario(string fecha, bool anio)
 
     // Colores por calendario (índice en calendarios.txt): el primario del tema y luego tonos fijos.
-    readonly property var colores: [Tema.primario, "#d7ab5b", "#5b9dd7", "#c07878", "#8fbf7f"]
+    readonly property var colores: [Tema.primario, Tema.amarillo, Tema.azul, Tema.rojo, Tema.verde]
     readonly property var meses: ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"]
     readonly property var diasSemana: ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"]
 
