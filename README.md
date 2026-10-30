@@ -50,6 +50,7 @@ config/uwsm/env.d/    variables de la sesión (GPU híbrida)
 config/cava/          ecualizador de la barra y graves para el teclado
 config/omarchy/       temas Caja Retro y Aether, barra (shell.json + ecualizador) y panel de agentes
 config/quickshell/    widgets del escritorio: pendientes, calendario y música
+config/fastfetch/     fastfetch con el sello 道 (michi) en sixel
 config/faro/          LLM local: Modelfile, ajustes de SearXNG e ícono
 config/systemd/user/  teclado reactivo, monitor interno, LLM local, cargador, avisos y uso de agentes
 bin/                  kbd-music, pantalla-modo, llm-cargador, faro-abrir, escritorio, ac-stay-awake,

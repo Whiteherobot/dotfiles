@@ -1,0 +1,38 @@
+{
+  "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
+  // Caja Retro: imagen lofi + etiquetas en japonés, paleta gruvbox material.
+  "logo": {
+    // sixel pre-renderizado a 224x238 px = 32x14 celdas de foot (7x17 px);
+    // foot no reporta píxeles y fastfetch calculaba mal el alto.
+    "type": "raw",
+    "source": "~/.config/fastfetch/img/logo.sixel",
+    "width": 32,
+    "height": 14,
+    "padding": { "top": 1, "left": 2, "right": 3 }
+  },
+  "display": {
+    "separator": "  ",
+    "color": { "keys": "38;2;231;138;78", "title": "38;2;169;182;101" },
+    "disableLinewrap": true
+  },
+  "modules": [
+    { "type": "title", "format": "{user-name}@{host-name}  ようこそ" },
+    { "type": "custom", "format": "\u001b[38;2;102;92;84m─── システム ───────────────────" },
+    { "type": "os", "key": "  OS", "keyColor": "38;2;234;105;98" },
+    { "type": "kernel", "key": "  カーネル", "keyColor": "38;2;231;138;78" },
+    { "type": "packages", "key": "󰏗  パッケージ", "keyColor": "38;2;216;166;87" },
+    { "type": "uptime", "key": "󰥔  稼働時間", "keyColor": "38;2;169;182;101" },
+    { "type": "wm", "key": "  WM", "keyColor": "38;2;137;180;130" },
+    { "type": "terminal", "key": "  端末", "keyColor": "38;2;125;174;163" },
+    { "type": "shell", "key": "  シェル", "keyColor": "38;2;211;134;155" },
+    { "type": "custom", "format": "\u001b[38;2;102;92;84m─── ハードウェア ───────────────" },
+    { "type": "cpu", "key": "  CPU", "keyColor": "38;2;234;105;98" },
+    { "type": "gpu", "key": "󰢮  GPU", "keyColor": "38;2;231;138;78" },
+    { "type": "memory", "key": "  メモリ", "keyColor": "38;2;216;166;87" },
+    { "type": "disk", "key": "󰋊  ディスク", "keyColor": "38;2;169;182;101", "folders": "/" },
+    { "type": "display", "key": "󰍹  画面", "keyColor": "38;2;125;174;163" },
+    { "type": "battery", "key": "󰁹  電池", "keyColor": "38;2;211;134;155" },
+    "break",
+    { "type": "colors", "symbol": "circle" }
+  ]
+}

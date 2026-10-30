@@ -31,6 +31,9 @@ enlaces+=(
   "config/uwsm/env.d/99-omarchy-upgrade-env:.config/uwsm/env.d/99-omarchy-upgrade-env"
   "config/omarchy/bar/modules/visualizer.qml:.config/omarchy/bar/modules/visualizer.qml"
   "config/starship.toml:.config/starship.toml"
+  "config/fastfetch/config.jsonc:.config/fastfetch/config.jsonc"
+  "config/fastfetch/img/logo.sixel:.config/fastfetch/img/logo.sixel"
+  "config/fastfetch/img/logo.png:.config/fastfetch/img/logo.png"
   "config/quickshell/escritorio:.config/quickshell/escritorio"
 )
 
