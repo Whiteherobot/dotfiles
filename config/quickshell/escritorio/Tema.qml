@@ -1,4 +1,4 @@
-// Colores del tema actual de Omarchy (current/theme/quickshell.json). Si cambias de tema,
+// Colores del tema actual de Omarchy (colors.toml del tema aplicado). Si cambias de tema,
 // los widgets lo siguen solos. Los valores por defecto son los del tema con que se armó.
 pragma Singleton
 import QtQuick
@@ -14,6 +14,11 @@ Singleton {
     // Para el degradado de las barras de música (colors.toml del tema): arriba → medio.
     property color brilloArriba: "#94ced7"
     property color brilloMedio: "#bae5cd"
+    // Colores de acento para calendarios y avisos.
+    property color amarillo: "#d7ab5b"
+    property color azul: "#5b9dd7"
+    property color rojo: "#c07878"
+    property color verde: "#8fbf7f"
 
     readonly property color tenue: conAlfa(texto, 0.66)
     readonly property color muyTenue: conAlfa(texto, 0.42)
@@ -27,24 +32,10 @@ Singleton {
         return Qt.rgba(c.r, c.g, c.b, a);
     }
 
+    // Omarchy 4 renderiza el tema en ~/.local/state/omarchy/current/theme y ya no genera
+    // quickshell.json: todo sale de colors.toml.
     FileView {
-        path: Quickshell.env("HOME") + "/.config/omarchy/current/theme/quickshell.json"
-        watchChanges: true
-        onFileChanged: reload()
-        onLoaded: {
-            try {
-                const c = JSON.parse(text());
-                if (c.background) tema.fondo = c.background;
-                if (c.primary) tema.primario = c.primary;
-                if (c.backgroundText) tema.texto = c.backgroundText;
-            } catch (e) {
-                console.warn("escritorio: tema ilegible", e);
-            }
-        }
-    }
-
-    FileView {
-        path: Quickshell.env("HOME") + "/.config/omarchy/current/theme/colors.toml"
+        path: Quickshell.env("HOME") + "/.local/state/omarchy/current/theme/colors.toml"
         watchChanges: true
         onFileChanged: reload()
         onLoaded: {
@@ -52,8 +43,15 @@ Singleton {
                 const m = new RegExp("^" + clave + "\\s*=\\s*\"(#[0-9a-fA-F]{6})\"", "m").exec(text());
                 return m ? m[1] : null;
             };
+            tema.fondo = leer("background") || tema.fondo;
+            tema.primario = leer("accent") || tema.primario;
+            tema.texto = leer("foreground") || tema.texto;
             tema.brilloArriba = leer("bright_magenta") || tema.brilloArriba;
             tema.brilloMedio = leer("bright_green") || tema.brilloMedio;
+            tema.amarillo = leer("yellow") || tema.amarillo;
+            tema.azul = leer("blue") || tema.azul;
+            tema.rojo = leer("red") || tema.rojo;
+            tema.verde = leer("green") || tema.verde;
         }
     }
 }
