@@ -48,7 +48,7 @@ Esta laptop recibió muchas críticas desde que salió. Al pasarla a Linux, casi
 config/hypr/          Hyprland en Lua (atajos, monitores, apariencia, entrada) y hypridle/hyprlock/hyprsunset
 config/uwsm/env.d/    variables de la sesión (GPU híbrida)
 config/cava/          ecualizador de la barra y graves para el teclado
-config/omarchy/       tema Aether, barra (shell.json + ecualizador) y panel de agentes
+config/omarchy/       temas Caja Retro y Aether, barra (shell.json + ecualizador) y panel de agentes
 config/quickshell/    widgets del escritorio: pendientes, calendario y música
 config/faro/          LLM local: Modelfile, ajustes de SearXNG e ícono
 config/systemd/user/  teclado reactivo, monitor interno, LLM local, cargador, avisos y uso de agentes
@@ -67,7 +67,7 @@ cd ~/dotfiles
 omarchy pkg add cava playerctl jq asusctl imagemagick   # instala solo los que falten
 ./install.sh --prueba             # muestra qué haría, sin tocar nada
 ./install.sh                      # enlaza la configuración y respalda lo que exista
-omarchy theme set Aether
+omarchy theme set "Caja Retro"    # o Aether
 omarchy restart shell
 sudo ./sistema/instalar-sistema.sh   # muestra cada cambio en /etc y pide confirmación
 ```

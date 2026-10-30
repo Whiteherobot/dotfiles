@@ -69,6 +69,25 @@ else
   echo "tema         $(corto "$tema")"
 fi
 
+# Caja Retro: gruvbox con bordes crema. Los fondos son de wallhaven.cc y tampoco se
+# redistribuyen; el nombre lleva el id (01-8xv35o.jpg → https://wallhaven.cc/w/8xv35o).
+tema="$HOME/.config/omarchy/themes/caja-retro"
+fondos=(01-8xv35o.jpg 02-132m93.jpg 03-1k6ljv.jpg 04-1p6d79.jpg 05-x6pl9v.jpg
+        06-y8q2g7.jpg 07-ymz61d.jpg 08-wq37kp.jpg 09-5779j8.jpg 10-nr7v8w.png)
+if $prueba; then
+  echo "copiaría     $(corto "$tema") y descargaría los fondos que falten"
+else
+  mkdir -p "$tema/backgrounds"
+  cp "$repo"/config/omarchy/themes/caja-retro/* "$tema/"
+  for f in "${fondos[@]}"; do
+    id="${f#*-}"; id="${id%.*}"
+    if [[ -s $tema/backgrounds/$f ]] || ! hay curl; then continue; fi
+    curl -fsSL -o "$tema/backgrounds/$f" "https://w.wallhaven.cc/full/${id:0:2}/wallhaven-$id.${f##*.}" ||
+      echo "aviso: no se pudo bajar el fondo $f"
+  done
+  echo "tema         $(corto "$tema")"
+fi
+
 # La barra (shell.json) y el panel de agentes se copian: Omarchy reescribe shell.json con
 # "omarchy bar …" y un enlace se perdería. Lo que ya exista se respalda igual que arriba.
 copias=(
@@ -143,7 +162,7 @@ if ! $prueba; then
   cat <<'EOF'
 
 Listo. Para terminar:
-  omarchy theme set Aether            # tema y colores
+  omarchy theme set "Caja Retro"     # tema y colores (o Aether)
   omarchy restart shell               # barra con música y panel de agentes
   sudo ./sistema/instalar-sistema.sh  # arreglos de la laptop (NVIDIA, hibernación, login)
 EOF
