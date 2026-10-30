@@ -22,7 +22,7 @@ import time
 import urllib.request
 from urllib.parse import unquote, urlparse
 
-THEME = os.path.expanduser("~/.config/omarchy/current/theme/colors.toml")
+THEME = os.path.expanduser("~/.local/state/omarchy/current/theme/colors.toml")
 CAVA_CONF = os.path.expanduser("~/.config/cava/keyboard.conf")
 LEVELS = 5            # pasos de intensidad entre el acento y el brillo máximo
 MIN_INTERVAL = 0.2    # segundos entre cambios (5 por segundo como máximo)
