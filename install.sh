@@ -91,11 +91,12 @@ else
   echo "tema         $(corto "$tema")"
 fi
 
-# La barra (shell.json) y el panel de agentes se copian: Omarchy reescribe shell.json con
+# La barra (shell.json), el panel de agentes y los escritorios con kanji se copian: Omarchy reescribe shell.json con
 # "omarchy bar …" y un enlace se perdería. Lo que ya exista se respalda igual que arriba.
 copias=(
   "config/omarchy/shell.json:.config/omarchy/shell.json"
   "config/omarchy/plugins/ing_michi.agents:.config/omarchy/plugins/ing_michi.agents"
+  "config/omarchy/plugins/ing_michi.workspaces:.config/omarchy/plugins/ing_michi.workspaces"
 )
 for par in "${copias[@]}"; do
   origen="$repo/${par%%:*}"

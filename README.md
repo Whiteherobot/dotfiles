@@ -48,7 +48,7 @@ Esta laptop recibió muchas críticas desde que salió. Al pasarla a Linux, casi
 config/hypr/          Hyprland en Lua (atajos, monitores, apariencia, entrada) y hypridle/hyprlock/hyprsunset
 config/uwsm/env.d/    variables de la sesión (GPU híbrida)
 config/cava/          ecualizador de la barra y graves para el teclado
-config/omarchy/       temas Caja Retro y Aether, barra (shell.json + ecualizador) y panel de agentes
+config/omarchy/       temas Caja Retro y Aether, barra (shell.json + ecualizador), escritorios con kanji (一 二 三) y panel de agentes
 config/quickshell/    widgets del escritorio: pendientes, calendario y música
 config/fastfetch/     fastfetch con el sello 道 (michi) en sixel
 config/faro/          LLM local: Modelfile, ajustes de SearXNG e ícono
@@ -73,7 +73,7 @@ omarchy restart shell
 sudo ./sistema/instalar-sistema.sh   # muestra cada cambio en /etc y pide confirmación
 ```
 
-- `install.sh` enlaza cada archivo en su lugar. `shell.json` y el panel de agentes se copian, porque Omarchy reescribe `shell.json` y rompería el enlace. Lo que ya exista se mueve a `~/.dotfiles-respaldo/<fecha>/`. Correrlo de nuevo no cambia nada.
+- `install.sh` enlaza cada archivo en su lugar. `shell.json`, el panel de agentes y los escritorios con kanji se copian, porque Omarchy reescribe `shell.json` y rompería el enlace. Lo que ya exista se mueve a `~/.dotfiles-respaldo/<fecha>/`. Correrlo de nuevo no cambia nada.
 - Pide la versión "quattro" de Omarchy o una más nueva: la configuración de Hyprland guarda solo los cambios propios y la barra es la de Omarchy.
 - `instalar-sistema.sh` muestra la diferencia de cada archivo de `/etc` antes de instalarlo, guarda una copia del anterior y, si cambió el initramfs, ofrece regenerarlo. El autologin queda con el usuario que corre el script. Reiniciar al terminar.
 
